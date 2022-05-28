@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "discord.js": "^13.7.0",
+    "dotenv": "^16.0.1",
+    "ramda": "^0.28.0",
+    "telegraf": "^4.8.2"
+  },
+  "type": "module"
+}
