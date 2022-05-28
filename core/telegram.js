@@ -2,9 +2,8 @@ import 'dotenv/config'
 import { Telegraf } from 'telegraf'
 import fs from 'fs'
 import {default as dsclient} from './discord.js'
-const json = JSON.parse(fs.readFileSync(`${process.cwd()}/config.json`));
 
-const tgclient = new Telegraf(process.env.TGTOKEN, {username: 'TeleBridge_robot', channelMode: true})
+const tgclient = new Telegraf(process.env.TGTOKEN, {username: process.env.tgusername, channelMode: true})
 tgclient.telegram.getMe().then((botInfo) => {
     tgclient.options.username = botInfo.username
   })
