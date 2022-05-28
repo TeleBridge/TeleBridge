@@ -1,5 +1,5 @@
 import * as R from 'ramda';
-function clearOldMessages(tgBot, offset = -1) {
+export function clearOldMessages(tgBot, offset = -1) {
 	const timeout = 0;
 	const limit = 100;
 	return tgBot.telegram.getUpdates(timeout, limit, offset).then(
@@ -15,5 +15,9 @@ function clearOldMessages(tgBot, offset = -1) {
 		)
 	);
 }
+export const escapeHTMLSpecialChars = R.compose(
+	R.replace(/>/g, "&gt;"),
+	R.replace(/</g, "&lt;"),
+	R.replace(/&/g, "&amp;")
+);
 
-export default clearOldMessages;

@@ -1,5 +1,5 @@
 import fs from 'fs';
-import {default as clearOldMessages} from './core/setup/main.js';
+import {clearOldMessages} from './core/setup/main.js';
 import { config as DotEnvConfig } from "dotenv";
 DotEnvConfig({
     path: `${process.cwd()}/.env`
