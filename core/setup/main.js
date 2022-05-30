@@ -20,4 +20,9 @@ export const escapeHTMLSpecialChars = R.compose(
 	R.replace(/</g, "&lt;"),
 	R.replace(/&/g, "&amp;")
 );
+export function escapeChars (text) {
+	return text
+		.replace("*", "\\*")
+		.replace("_", "\\_")
+}
 
