@@ -62,9 +62,9 @@ tgclient.on('photo', async(ctx) => {
     let at = new MessageAttachment(atarray[i], `image${i}.jpg`)
     array2.push(at)
   }
-array2.splice(array.length/2)
-  dsclient.channels.cache.get(process.env.discordchannelid).send({files: [array2]});
-    //console.log(await dsclient.channels.cache.get(process.env.discordchannelid).send({content: files: atarray}))
+array2.splice(array2.length/2)
+  dsclient.channels.cache.get(process.env.discordchannelid).send({files: array2});
+  
 })
 tgclient.on('video', async(ctx) => {
   //get video link
