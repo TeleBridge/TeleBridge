@@ -1,56 +1,44 @@
 import 'dotenv/config'
 import { Telegraf } from 'telegraf'
-import {default as dsclient} from './discord.js'
+import {default as dsclient } from './discord.js'
 import { MessageAttachment } from 'discord.js'
-import { escapeChars } from './setup/main.js'
+import { escapeChars, handleUser } from './setup/main.js'
 
 const tgclient = new Telegraf(process.env.TGTOKEN, {username: process.env.tgusername, channelMode: true})
 tgclient.telegram.getMe().then((botInfo) => {
-    tgclient.options.username = botInfo.username
-  })
+  tgclient.options.username = botInfo.username
+})
 
 tgclient.start((ctx) => ctx.replyWithHTML('Welcome!\nThis is a self-hosted TeleBridge instance, for more info, check out the <a href="https://github.com/AntogamerYT/TeleBridge">GitHub Repo</a> (Not public yet)'))
 tgclient.on('text', async(ctx) => {
-    if (ctx.chat.id != process.env.tgchatid) return;
-    ctx.message.reply_to_message 
-    let username;
-    switch (ctx.message.from.username) {
-      case 'undefined':
-        username = ctx.message.from.first_name;
-        break;
-      default:
-        username = ctx.message.from.username;
-        break;
-    }
-    let userreply;
-    if(ctx.message.reply_to_message != undefined) {
-      switch (ctx.message.reply_to_message.from.username) {
-        case 'undefined':
-          userreply = ctx.message.reply_to_message.from.first_name;
-          break;
-        default:
-          userreply = ctx.message.reply_to_message.from?.username;
-          break;
-      }
-    }
-    let extraargs;
-    if(ctx.message.is_automatic_forward === true) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.message.forward_from_chat.title}
-    if(ctx.message.forward_from_chat != undefined){ extraargs = `(Forwarded from ${username})`; username = ctx.message.forward_from_chat.title}
-    if(ctx.message.forward_from != undefined){ extraargs = `(Forwarded from **${ctx.message.forward_from.username}**)`;}
-    if(ctx.message.reply_to_message != undefined){ extraargs = `(Replying to ${userreply})`; }
-    if(extraargs === undefined) extraargs = '';
-    dsclient.channels.cache.get(process.env.discordchannelid).send(`**${escapeChars(username)}** ${extraargs}:\n ${ctx.message.text}`);
+  if (ctx.chat.id != process.env.tgchatid) return;
+  let {username, userreply, extraargs} = handleUser(ctx)
+  dsclient.channels.cache.get(process.env.discordchannelid).send(`**${escapeChars(username)}** ${extraargs}:\n ${ctx.message.text}`);
 })
+  
 tgclient.on('sticker', async(ctx) => {
-  //get sticker emoji and image link 
-    //send sticker to discord
-
+  if (ctx.chat.id != process.env.tgchatid) return;
+  let {username, userreply, extraargs} = handleUser(ctx)
   let emoji = ctx.message.sticker.emoji;
   let image = ctx.message.sticker.file_id;
+  let ext;
+   if(ctx.message.sticker.is_video === true) {
+  	ext = '.webm'
+  } else {
+  	ext = '.webp'
+  }
+  console.log(ext) // wtf che cazzo di tab
   const link = await ctx.telegram.getFileLink(image);
-  console.log(link.href)
+  let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/stickers\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/stickers\//gmi, '')
+  filename = filename.replace(/\.tgs$/gmi, '.webp') // anto mannaggia a dio... filename.replace returna una stringa, ma se tu sta stringa non la salvi in una variabile, è tutto inutile
+  // madonna ma un po di indenting no? lol no
+  const attachment = new MessageAttachment(link.href, filename)
+  dsclient.channels.cache.get(process.env.discordchannelid).send({content: `**${escapeChars(username)}** ${extraargs}:\n ${emoji}`, files: [attachment]}); // si deve usare files aaaaaaa
 })
+
 tgclient.on('photo', async(ctx) => {
+  if (ctx.chat.id != process.env.tgchatid) return;
+  let { username, userreply, extraargs } = handleUser(ctx)
   let atarray = []
   for(let i = 0; i < ctx.message.photo.length; i++) {
     let image = ctx.message.photo[i].file_id;
@@ -62,13 +50,20 @@ tgclient.on('photo', async(ctx) => {
     let at = new MessageAttachment(atarray[i], `image${i}.jpg`)
     array2.push(at)
   }
-array2.splice(array2.length/2)
-  dsclient.channels.cache.get(process.env.discordchannelid).send({files: array2});
-  
+  array2.splice(array2.length/2)
+  let msgcontent;
+  switch(ctx.message.caption) {
+    case undefined:
+      msgcontent = `_No caption_`
+      break;
+    default:
+      msgcontent = ctx.message.caption
+      break;
+  }
+  dsclient.channels.cache.get(process.env.discordchannelid).send({content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}` ,files: array2});
 })
 tgclient.on('video', async(ctx) => {
-  //get video link
-  //send video to discord
+  // to be done later
   let image = ctx.message.video.file_id;
   console.log(image)
 })

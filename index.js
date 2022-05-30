@@ -4,7 +4,7 @@ import { config as DotEnvConfig } from "dotenv";
 DotEnvConfig({
     path: `${process.cwd()}/.env`
 })
-
+// ci siamo ig
 
 // Load discord client and telegram client from the core/ folder
 import discord from './core/discord.js';

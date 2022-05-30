@@ -26,3 +26,33 @@ export function escapeChars (text) {
 		.replace("_", "\\_")
 }
 
+export function handleUser(ctx) {
+	let username;
+	let userreply;
+	let extraargs;
+    switch (ctx.message.from.username) {
+      case undefined:
+        username = ctx.message.from.first_name;
+        break;
+      default:
+        username = ctx.message.from.username;
+        break;
+    }
+    if(ctx.message.reply_to_message != undefined) {
+      switch (ctx.message.reply_to_message.from.username) {
+        case undefined:
+          userreply = ctx.message.reply_to_message.from.first_name;
+          break;
+        default:
+          userreply = ctx.message.reply_to_message.from?.username;
+          break;
+      }
+    }
+    if(ctx.message.is_automatic_forward === true) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.message.forward_from_chat.title}
+    if(ctx.message.forward_from_chat != undefined){ extraargs = `(Forwarded from ${username})`; username = ctx.message.forward_from_chat.title}
+    if(ctx.message.forward_from != undefined){ extraargs = `(Forwarded from **${ctx.message.forward_from.username}**)`;}
+    if(ctx.message.reply_to_message != undefined){ extraargs = `(Replying to ${userreply})`; }
+    if(extraargs === undefined) extraargs = '';
+	return {username, userreply, extraargs}
+
+}
