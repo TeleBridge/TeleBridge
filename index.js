@@ -9,7 +9,9 @@ DotEnvConfig({
 // Load discord client and telegram client from the core/ folder
 import discord from './core/discord.js';
 import telegram from './core/telegram.js';
-
+process.on('uncaughtException', (err) => {
+    console.log(err);
+})
 await clearOldMessages(telegram)
 telegram.launch()
 discord.login(process.env.DISCORDTOKEN)

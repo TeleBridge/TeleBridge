@@ -30,7 +30,7 @@ tgclient.on('sticker', async(ctx) => {
   console.log(ext) // wtf che cazzo di tab
   const link = await ctx.telegram.getFileLink(image);
   let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/stickers\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/stickers\//gmi, '')
-  filename = filename.replace(/\.tgs$/gmi, '.webp') // anto mannaggia a dio... filename.replace returna una stringa, ma se tu sta stringa non la salvi in una variabile, è tutto inutile
+  filename = filename.replace(/\.tgs$/gmi, '.webp') 
   // madonna ma un po di indenting no? lol no
   const attachment = new MessageAttachment(link.href, filename)
   dsclient.channels.cache.get(process.env.discordchannelid).send({content: `**${escapeChars(username)}** ${extraargs}:\n ${emoji}`, files: [attachment]}); // si deve usare files aaaaaaa
@@ -45,12 +45,10 @@ tgclient.on('photo', async(ctx) => {
     let link = await ctx.telegram.getFileLink(image);
     atarray.push(link.href)
   }
+
   let array2 = []
-  for(let i = 1; i < atarray.length; i++) {
-    let at = new MessageAttachment(atarray[i], `image${i}.jpg`)
-    array2.push(at)
-  }
-  array2.splice(array2.length/2)
+  let at = new MessageAttachment(atarray[atarray.length-1], `image${atarray[atarray.length-1]}.jpg`)
+  array2.push(at)
   let msgcontent;
   switch(ctx.message.caption) {
     case undefined:
@@ -60,13 +58,99 @@ tgclient.on('photo', async(ctx) => {
       msgcontent = ctx.message.caption
       break;
   }
-  dsclient.channels.cache.get(process.env.discordchannelid).send({content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}` ,files: array2});
+  
+  try {
+    dsclient.channels.cache.get(process.env.discordchannelid).send({content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}` ,files: array2});
+  } catch (error) {
+    const message = await ctx.replyWithHTML('<i>Error: the file couldn\'t be processed because it exceeds Discord\'s maximum file size (8MB)</i>')
+    dsclient.channels.cache.get(process.env.discordchannelid).send(`**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`);
+    setTimeout(() => {
+      ctx.telegram.deleteMessage(ctx.chat.id, message.message_id)
+    }, 5000);
+  }
+  
 })
 tgclient.on('video', async(ctx) => {
-  // to be done later
+  if (ctx.chat.id != process.env.tgchatid) return;
+  let { username, userreply, extraargs } = handleUser(ctx)
+  
+  let msgcontent;
+  switch(ctx.message.caption) {
+    case undefined:
+      msgcontent = `_No caption_`
+      break;
+    default:
+      msgcontent = ctx.message.caption
+      break;
+  }
   let image = ctx.message.video.file_id;
-  console.log(image)
+  let link = await ctx.telegram.getFileLink(image);
+  let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/videos\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/videos\//gmi, '')
+  const attachment = new MessageAttachment(link.href, filename)
+  try {
+    dsclient.channels.cache.get(process.env.discordchannelid).send({content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}` ,files: [attachment]});
+  } catch (error) {
+    const message = await ctx.replyWithHTML('<i>Error: the file couldn\'t be processed because it exceeds Discord\'s maximum file size (8MB)</i>')
+    dsclient.channels.cache.get(process.env.discordchannelid).send(`**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`);
+    setTimeout(() => {
+      ctx.telegram.deleteMessage(ctx.chat.id, message.message_id)
+    }, 5000);
+  }
 })
+tgclient.on('voice', async(ctx) => {
+  if (ctx.chat.id != process.env.tgchatid) return;
+  let { username, userreply, extraargs } = handleUser(ctx)
+  let msgcontent;
+  switch(ctx.message.caption) {
+    case undefined:
+      msgcontent = `_No caption_`
+      break;
+    default:
+      msgcontent = ctx.message.caption
+      break;
+  }
+  let image = ctx.message.voice.file_id;
+  let link = await ctx.telegram.getFileLink(image);
+  let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/voice\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/voice\//gmi, '')
+  const attachment = new MessageAttachment(link.href, filename)
+  try {
+    dsclient.channels.cache.get(process.env.discordchannelid).send({content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}` ,files: [attachment]});
+  } catch (error) {
+    const message = await ctx.replyWithHTML('<i>Error: the file couldn\'t be processed because it exceeds Discord\'s maximum file size (8MB)</i>')
+    dsclient.channels.cache.get(process.env.discordchannelid).send(`**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`);
+    setTimeout(() => {
+      ctx.telegram.deleteMessage(ctx.chat.id, message.message_id)
+    }, 5000);
+  }
+})
+tgclient.on('document', async(ctx) => {
+  if (ctx.chat.id != process.env.tgchatid) return;
+  let { username, userreply, extraargs } = handleUser(ctx)
+  let msgcontent;
+  switch(ctx.message.caption) {
+    case undefined:
+      msgcontent = `_No caption_`
+      break;
+    default:
+      msgcontent = ctx.message.caption
+      break;
+  }
+  let image = ctx.message.document.file_id;
+  let link = await ctx.telegram.getFileLink(image);
+  let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/documents\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/documents\//gmi, '')
+  const attachment = new MessageAttachment(link.href, filename)
+  try {
+    dsclient.channels.cache.get(process.env.discordchannelid).send({content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}` ,files: [attachment]});
+  } catch (error) {
+    const message = await ctx.replyWithHTML('<i>Error: the file couldn\'t be processed because it exceeds Discord\'s maximum file size (8MB)</i>')
+    dsclient.channels.cache.get(process.env.discordchannelid).send(`**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`);
+    setTimeout(() => {
+      ctx.telegram.deleteMessage(ctx.chat.id, message.message_id)
+    }, 5000);
+  }
+})
+
+
 
 
 export default tgclient
