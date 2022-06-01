@@ -50,7 +50,7 @@ export function handleUser(ctx) {
     }
     if(ctx.message.is_automatic_forward === true) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.message.forward_from_chat.title}
     if(ctx.message.forward_from_chat != undefined){ extraargs = `(Forwarded from ${username})`; username = ctx.message.forward_from_chat.title}
-    if(ctx.message.forward_from != undefined){ extraargs = `(Forwarded from **${ctx.message.forward_from.username}**)`;}
+    if(ctx.message.forward_from != undefined){ extraargs = `(Forwarded by **${ctx.message.forward_from.username}**)`;}
     if(ctx.message.reply_to_message != undefined){ extraargs = `(Replying to ${userreply})`; }
     if(extraargs === undefined) extraargs = '';
 	return {username, userreply, extraargs}
