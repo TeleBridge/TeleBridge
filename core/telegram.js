@@ -27,7 +27,6 @@ tgclient.on('sticker', async(ctx) => {
   } else {
   	ext = '.webp'
   }
-  console.log(ext) // wtf che cazzo di tab
   const link = await ctx.telegram.getFileLink(image);
   let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/stickers\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/stickers\//gmi, '')
   filename = filename.replace(/\.tgs$/gmi, '.webp') 
@@ -149,7 +148,6 @@ tgclient.on('document', async(ctx) => {
     }, 5000);
   }
 })
-
 
 
 

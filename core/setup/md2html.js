@@ -108,7 +108,8 @@ function md2html(text) {
                         const tags = tagMap[node.type];
 
                         // Build the HTML
-                        return html + `${tags.start}${extractText(node)}${tags.end}`;
+                        return html + `${tags.start}${extractText(node)}${tags.end}`
+                        
                 }, "");
 
         return html;
