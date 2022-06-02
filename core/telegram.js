@@ -37,9 +37,8 @@ tgclient.on('sticker', async(ctx) => {
   const link = await ctx.telegram.getFileLink(image);
   let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/stickers\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/stickers\//gmi, '')
   filename = filename.replace(/\.tgs$/gmi, '.webp') 
-  // madonna ma un po di indenting no? lol no
   const attachment = new MessageAttachment(link.href, filename)
-  dsclient.channels.cache.get(process.env.discordchannelid).send({content: `**${escapeChars(username)}** ${extraargs}:\n ${emoji}`, files: [attachment]}); // si deve usare files aaaaaaa
+  dsclient.channels.cache.get(process.env.discordchannelid).send({content: `**${escapeChars(username)}** ${extraargs}:\n ${emoji}`, files: [attachment]}); 
 })
 
 tgclient.on('photo', async(ctx) => {
