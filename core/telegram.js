@@ -8,14 +8,21 @@ const tgclient = new Telegraf(process.env.TGTOKEN, {username: process.env.tguser
 tgclient.telegram.getMe().then((botInfo) => {
   tgclient.options.username = botInfo.username
 })
-
-tgclient.start((ctx) => ctx.replyWithHTML('Welcome!\nThis is a self-hosted TeleBridge instance, for more info, check out the <a href="https://github.com/AntogamerYT/TeleBridge">GitHub Repo</a> (Not public yet)'))
+tgclient.command('chatinfo', async(ctx) => {
+  ctx.reply(`Chat ID: ${ctx.chat.id}\nChat Type: ${ctx.chat.type}\nChat Title: ${ctx.chat.title}`)
+})
+tgclient.start((ctx) => ctx.replyWithHTML('Welcome!\nThis is a self-hosted TeleBridge instance, for more info, check out the <a href="https://github.com/AntogamerYT/TeleBridge">GitHub Repo</a>'))
 tgclient.on('text', async(ctx) => {
   if (ctx.chat.id != process.env.tgchatid) return;
   let {username, userreply, extraargs} = handleUser(ctx)
   dsclient.channels.cache.get(process.env.discordchannelid).send(`**${escapeChars(username)}** ${extraargs}:\n ${ctx.message.text}`);
 })
-  
+
+tgclient.on('channel_post', async(ctx) => {
+  if (ctx.chat.id != process.env.tgchatid) return;
+  dsclient.channels.cache.get(process.env.discordchannelid).send(`**${escapeChars(ctx.update.channel_post.chat.title)}**:\n ${ctx.update.channel_post.text}`);
+})
+
 tgclient.on('sticker', async(ctx) => {
   if (ctx.chat.id != process.env.tgchatid) return;
   let {username, userreply, extraargs} = handleUser(ctx)
