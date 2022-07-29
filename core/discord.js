@@ -9,7 +9,7 @@ dsclient.on('ready', () => {
     dsclient.channels.cache.get(process.env.discordchannelid).send('Discord Client ready and logged in as ' + dsclient.user.tag + '.');
 })
 
-dsclient.on('messageCreate', (message) => {
+dsclient.on('messageCreate', async(message) => {
     if (message.author.bot) return;
     if(message.channel.id != process.env.discordchannelid) return;
     let attachmentarray = [];
@@ -20,6 +20,7 @@ dsclient.on('messageCreate', (message) => {
     if(message.cleanContent) msgcontent = md2html(message.cleanContent);
     if(!msgcontent) msgcontent = '';
     const string = attachmentarray.toString().replaceAll(',', ' ')
-    tgclient.telegram.sendMessage(process.env.tgchatid, `<b>${message.author.tag}</b>:\n${msgcontent} ${string}`, {parse_mode: 'html'})
+    const msg = await tgclient.telegram.sendMessage(process.env.tgchatid, `<b>${message.author.tag}</b>:\n${msgcontent} ${string}`, {parse_mode: 'html'})
+    global.messages[msg.message_id] = message.id
     ;})
 export default dsclient;

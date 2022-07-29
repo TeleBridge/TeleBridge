@@ -1,4 +1,3 @@
-import fs from 'fs';
 import {clearOldMessages} from './core/setup/main.js';
 import { config as DotEnvConfig } from "dotenv";
 DotEnvConfig({
@@ -11,6 +10,7 @@ import telegram from './core/telegram.js';
 process.on('uncaughtException', (err) => {
     console.log(err);
 })
+global.messages = {}
 await clearOldMessages(telegram)
 telegram.launch()
 discord.login(process.env.DISCORDTOKEN)
