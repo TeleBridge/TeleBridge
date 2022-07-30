@@ -13,8 +13,8 @@ tgclient.command('chatinfo', async(ctx) => {
 })
 tgclient.command('delete', async(ctx) => {
   if (ctx.chat.id != process.env.tgchatid) return;
+  if(!ctx.message.reply_to_message) return ctx.reply('Please reply to a message to delete it.')
   const message = ctx.message.reply_to_message.message_id
-  if(!message) return ctx.reply('Please reply to a message to delete it.')
   const messageid = global.messages[message]
   if (messageid != undefined) {
     tgclient.telegram.deleteMessage(process.env.tgchatid, message)
@@ -29,6 +29,7 @@ tgclient.command('delete', async(ctx) => {
 tgclient.start((ctx) => ctx.replyWithHTML('Welcome!\nThis is a self-hosted TeleBridge instance, for more info, check out the <a href="https://github.com/AntogamerYT/TeleBridge">GitHub Repo</a>'))
 tgclient.on('text', async(ctx) => {
   if (ctx.chat.id != process.env.tgchatid) return;
+  // get user id
   let {username, userreply, extraargs} = handleUser(ctx)
   const msg = await dsclient.channels.cache.get(process.env.discordchannelid).send(`**${escapeChars(username)}** ${extraargs}:\n ${ctx.message.text}`);
   global.messages[ctx.message.message_id] = msg.id

@@ -22,5 +22,17 @@ dsclient.on('messageCreate', async(message) => {
     const string = attachmentarray.toString().replaceAll(',', ' ')
     const msg = await tgclient.telegram.sendMessage(process.env.tgchatid, `<b>${message.author.tag}</b>:\n${msgcontent} ${string}`, {parse_mode: 'html'})
     global.messages[msg.message_id] = message.id
-    ;})
+;})
+
+dsclient.on('messageDelete', async(message) => {
+    if (message.author.bot) return;
+    if(message.channel.id != process.env.discordchannelid) return;
+    const messageid = Object.keys(global.messages).find(key => global.messages[key] === message.id)
+    console.log(messageid)
+    if (messageid != undefined) {
+        await tgclient.telegram.deleteMessage(process.env.tgchatid, messageid)
+    }
+})
+
+
 export default dsclient;
