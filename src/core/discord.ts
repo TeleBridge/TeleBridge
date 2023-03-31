@@ -16,9 +16,9 @@ dsclient.on('messageCreate', async(message) => {
     message.attachments.forEach(async ({ url }) => {
         attachmentarray.push(url);
     });
-    let msgcontent;
-    if(message.cleanContent) msgcontent = md2html(message.cleanContent);
-    if(!msgcontent) msgcontent = '';
+    let msgcontent: string;
+    if (message.cleanContent) { msgcontent = md2html(message.cleanContent); } else { msgcontent = ''; }
+    if (message.stickers.size > 0) message.stickers.forEach(s => msgcontent += ' ' + s.url);
     const string = attachmentarray.toString().replaceAll(',', ' ')
     const msg = await tgclient.telegram.sendMessage(process.env.TGCHATID, `<b>${message.author.tag}</b>:\n${msgcontent} ${string}`, {parse_mode: 'HTML'})
     await global.db.collection('messages').insertOne({discord: message.id, telegram: msg.message_id})
