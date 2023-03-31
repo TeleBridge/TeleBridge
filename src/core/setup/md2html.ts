@@ -25,7 +25,9 @@ const tagMap = new Proxy(
                         // Check if tags are defined for this type
                         if (prop in target) {
                                 // Create the proper tags
+                                //@ts-expect-error
                                 tags.start = `<${target[prop]}>`;
+                                //@ts-expect-error
                                 tags.end = `</${target[prop]}>`;
                         }
                         return tags;
@@ -36,6 +38,7 @@ const tagMap = new Proxy(
 /** Syntax tree node representing a newline */
 const newlineNode = { content: "\n", type: "text" };
 
+//@ts-expect-error
 function extractText(node) {
         // Extract the text from the node
         let text = node.content;
@@ -52,6 +55,7 @@ function extractText(node) {
 
 // Ignore some rules which only creates trouble
 ["list", "heading"].forEach(type => {
+        // @ts-expect-error
         simpleMarkdown.defaultRules[type] = {
                 order: Number.POSITIVE_INFINITY,
                 match: () => null // Never match anything in order to ignore this rule
@@ -72,7 +76,7 @@ const mdParse = simpleMarkdown.defaultBlockParse;
  *
  * @return {String}     Telegram-friendly HTML
  */
-function md2html(text) {
+function md2html(text: string) {
         // XXX Some users get a space after @ in mentions bridged to Telegram. See #148
         // This is compensation for that discord error
         text = R.replace("@\u200B", "@", R.defaultTo("", text));
@@ -92,12 +96,15 @@ function md2html(text) {
                         return content;
                 })
                 // Flatten the resulting structure
+                //@ts-expect-error
                 .reduce((flattened, nodes) => flattened.concat([newlineNode, newlineNode], nodes), [])
                 // Remove the two initial newlines created by the previous line
                 .slice(2)
                 .reduce((html, node) => {
+                        //@ts-expect-error
                         if (node.type === "br") {
                                 return html + "\n";
+                        //@ts-expect-error
                         } else if (node.type === "hr") {
                                 return html + "---";
                         }
@@ -105,6 +112,7 @@ function md2html(text) {
                         // Turn the nodes into HTML
                         // Telegram doesn't support nested tags, so only apply tags to the outer nodes
                         // Get the tag type of this node
+                        //@ts-expect-error
                         const tags = tagMap[node.type];
 
                         // Build the HTML
