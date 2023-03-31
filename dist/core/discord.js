@@ -16,11 +16,23 @@ dsclient.on('messageCreate', async (message) => {
         attachmentarray.push(url);
     });
     let msgcontent;
-    if (message.cleanContent)
+    if (message.cleanContent) {
         msgcontent = md2html(message.cleanContent);
-    if (!msgcontent)
+    }
+    else {
         msgcontent = '';
+    }
+    if (message.stickers.size > 0)
+        message.stickers.forEach(s => msgcontent += ' ' + s.url);
     const string = attachmentarray.toString().replaceAll(',', ' ');
+    if (message.reference) {
+        const msgid = await global.db.collection('messages').findOne({ discord: message.reference.messageId });
+        if (msgid) {
+            const msg = await tgclient.telegram.sendMessage(process.env.TGCHATID, `<b>${message.author.tag}</b>:\n${msgcontent} ${string}`, { parse_mode: 'HTML', reply_to_message_id: parseInt(msgid.telegram) });
+            await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id });
+            return;
+        }
+    }
     const msg = await tgclient.telegram.sendMessage(process.env.TGCHATID, `<b>${message.author.tag}</b>:\n${msgcontent} ${string}`, { parse_mode: 'HTML' });
     await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id });
 });

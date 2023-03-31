@@ -44,6 +44,15 @@ tgclient.on('text', async (ctx) => {
     let username = user.username;
     let extraargs = user.extraargs;
     let userreply = user.userreply;
+    if (ctx.message.reply_to_message) {
+        const msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id });
+        if (msgid) {
+            const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);
+            await msg.reply(`**${escapeChars(username)}** ${extraargs}:\n ${ctx.message.text}`);
+            await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
+            return;
+        }
+    }
     const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).send(`**${escapeChars(username)}** ${extraargs}:\n ${ctx.message.text}`);
     await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
 });
@@ -84,6 +93,15 @@ tgclient.on(channelPost("text"), async (ctx) => {
         ctx.deleteMessage();
         return;
     }
+    if (ctx.update.channel_post.reply_to_message) {
+        const msgid = await global.db.collection("messages").findOne({ telegram: ctx.update.channel_post.reply_to_message.message_id });
+        if (msgid) {
+            const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);
+            await msg.reply(`**${escapeChars(ctx.update.channel_post.chat.title)}**:\n ${ctx.update.channel_post.text}`);
+            await global.db.collection('messages').insertOne({ telegram: ctx.update.channel_post.reply_to_message.message_id, discord: msg.id });
+            return;
+        }
+    }
     const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).send(`**${escapeChars(ctx.update.channel_post.chat.title)}**:\n ${ctx.update.channel_post.text}`);
     await global.db.collection("messages").insertOne({ telegram: ctx.channelPost.message_id, discord: msg.id });
 });
@@ -111,6 +129,15 @@ tgclient.on('sticker', async (ctx) => {
         return;
     filename = filename.replace(/\.tgs$/gmi, '.webp');
     const attachment = new AttachmentBuilder(link.href, { name: filename });
+    if (ctx.message.reply_to_message) {
+        const msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id });
+        if (msgid) {
+            const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);
+            await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n ${emoji}`, files: [attachment] });
+            await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
+            return;
+        }
+    }
     const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).send({ content: `**${escapeChars(username)}** ${extraargs}:\n ${emoji}`, files: [attachment] });
     await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
 });
@@ -142,13 +169,30 @@ tgclient.on('photo', async (ctx) => {
             msgcontent = ctx.message.caption;
             break;
     }
+    let msgid;
+    if (ctx.message.reply_to_message) {
+        msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id });
+    }
     try {
+        if (msgid) {
+            const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);
+            await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: array2 });
+            await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
+            return;
+        }
         const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).send({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: array2 });
         await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
     }
     catch (error) {
         const message = await ctx.replyWithHTML('<i>Error: the file couldn\'t be processed because it exceeds Discord\'s maximum file size (8MB)</i>');
+        if (msgid) {
+            const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);
+            await msg.reply(`**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`);
+            await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
+            return;
+        }
         const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).send(`**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`);
+        await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
         setTimeout(() => {
             ctx.telegram.deleteMessage(ctx.chat.id, message.message_id);
         }, 5000);
@@ -176,12 +220,28 @@ tgclient.on('video', async (ctx) => {
     let link = await ctx.telegram.getFileLink(image);
     let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/videos\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/videos\//gmi, '');
     const attachment = new AttachmentBuilder(link.href, { name: filename });
+    let msgid;
+    if (ctx.message.reply_to_message) {
+        msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id });
+    }
     try {
+        if (msgid) {
+            const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);
+            await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: [attachment] });
+            await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
+            return;
+        }
         const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).send({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: [attachment] });
         await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
     }
     catch (error) {
         const message = await ctx.replyWithHTML('<i>Error: the file couldn\'t be processed because it exceeds Discord\'s maximum file size (8MB)</i>');
+        if (msgid) {
+            const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);
+            await msg.reply(`**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`);
+            await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
+            return;
+        }
         const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).send(`**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`);
         await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
         setTimeout(() => {
@@ -211,12 +271,28 @@ tgclient.on('voice', async (ctx) => {
     let link = await ctx.telegram.getFileLink(image);
     let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/voice\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/voice\//gmi, '');
     const attachment = new AttachmentBuilder(link.href, { name: filename });
+    let msgid;
+    if (ctx.message.reply_to_message) {
+        msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id });
+    }
     try {
+        if (msgid) {
+            const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);
+            await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: [attachment] });
+            await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
+            return;
+        }
         const msg = await (await dsclient.channels.cache.get(process.env.DISCORDCHANNELID)).send({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: [attachment] });
         await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
     }
     catch (error) {
         const message = await ctx.replyWithHTML('<i>Error: the file couldn\'t be processed because it exceeds Discord\'s maximum file size (8MB)</i>');
+        if (msgid) {
+            const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);
+            await msg.reply(`**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`);
+            await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
+            return;
+        }
         const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).send(`**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`);
         await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
         setTimeout(() => {
@@ -246,12 +322,28 @@ tgclient.on('document', async (ctx) => {
     let link = await ctx.telegram.getFileLink(image);
     let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/documents\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/documents\//gmi, '');
     const attachment = new AttachmentBuilder(link.href, { name: filename });
+    let msgid;
+    if (ctx.message.reply_to_message) {
+        msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id });
+    }
     try {
+        if (msgid) {
+            const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);
+            await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: [attachment] });
+            await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
+            return;
+        }
         const msg = await (await dsclient.channels.cache.get(process.env.DISCORDCHANNELID)).send({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: [attachment] });
         await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
     }
     catch (error) {
         const message = await ctx.replyWithHTML('<i>Error: the file couldn\'t be processed because it exceeds Discord\'s maximum file size (8MB)</i>');
+        if (msgid) {
+            const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);
+            await msg.reply(`**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`);
+            await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
+            return;
+        }
         const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).send(`**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`);
         await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
         setTimeout(() => {
