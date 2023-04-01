@@ -1,6 +1,7 @@
 # TeleBridge
 A Telegram-Discord bridge!
 
+Do you want to try the bot before self-hosting it? [Join my Discord server](https://discord.gg/ekaCwEfUt4) and/or [the TeleBridge test group](https://t.me/+FxQGfeA-C2hmYjA8)
 
 ## Requirements
 - MongoDB Database (Atlas is fine but idk if there are ratelimits, selfhost ftw)
@@ -19,3 +20,4 @@ A Telegram-Discord bridge!
 - Fill out the [.env.example](https://github.com/AntogamerYT/TeleBridge/blob/master/.env.example) and rename it into `.env`
 - Run `npm install` to install the required packages
 - Run `npm run build` to build the code, then `npm start` and (if everything was done correctly) the bot will be up and ready to use!
+
