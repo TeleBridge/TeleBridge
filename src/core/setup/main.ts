@@ -96,7 +96,9 @@ export function handleEditedUser(ctx: any) {
 	if (ctx.has(message("forward_from_chat"))) { extraargs = `(Forwarded from ${username})`; username = ctx.editedMessage.forward_from_chat.title}
 	if (ctx.has(message("text")) && ctx.editedMessage.forward_from){ extraargs = `(Forwarded by **${ctx.editedMessage.forward_from.username}**)`;}
 	if (userreply) { extraargs = `(Replying to ${userreply})`; }
-	
+	if (extraargs === undefined) extraargs = '';
+	if (userreply === undefined) userreply = '';
+	if (username === undefined) username = '';
 	return {username, userreply, extraargs}
 
 }

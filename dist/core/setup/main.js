@@ -102,5 +102,11 @@ export function handleEditedUser(ctx) {
     if (userreply) {
         extraargs = `(Replying to ${userreply})`;
     }
+    if (extraargs === undefined)
+        extraargs = '';
+    if (userreply === undefined)
+        userreply = '';
+    if (username === undefined)
+        username = '';
     return { username, userreply, extraargs };
 }

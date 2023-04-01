@@ -37,6 +37,7 @@ tgclient.start((ctx) => ctx.replyWithHTML('Welcome!\nThis is a self-hosted TeleB
 tgclient.on('text', async (ctx) => {
     if (ctx.chat.id != parseInt(process.env.TGCHATID))
         return;
+    console.log("got text");
     // get user id
     let user = handleUser(ctx);
     if (!user)
@@ -170,10 +171,10 @@ tgclient.on('photo', async (ctx) => {
             break;
     }
     let msgid;
-    if (ctx.message.reply_to_message) {
-        msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id });
-    }
     try {
+        if (ctx.message.reply_to_message) {
+            msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id });
+        }
         if (msgid) {
             const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);
             await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: array2 });
@@ -217,14 +218,14 @@ tgclient.on('video', async (ctx) => {
             break;
     }
     let image = ctx.message.video.file_id;
-    let link = await ctx.telegram.getFileLink(image);
-    let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/videos\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/videos\//gmi, '');
-    const attachment = new AttachmentBuilder(link.href, { name: filename });
     let msgid;
-    if (ctx.message.reply_to_message) {
-        msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id });
-    }
     try {
+        let link = await ctx.telegram.getFileLink(image);
+        let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/videos\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/videos\//gmi, '');
+        const attachment = new AttachmentBuilder(link.href, { name: filename });
+        if (ctx.message.reply_to_message) {
+            msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id });
+        }
         if (msgid) {
             const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);
             await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: [attachment] });
@@ -340,7 +341,7 @@ tgclient.on('document', async (ctx) => {
         const message = await ctx.replyWithHTML('<i>Error: the file couldn\'t be processed because it exceeds Discord\'s maximum file size (8MB)</i>');
         if (msgid) {
             const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);
-            await msg.reply(`**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`);
+            await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`, allowedMentions: { repliedUser: true } });
             await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id });
             return;
         }
