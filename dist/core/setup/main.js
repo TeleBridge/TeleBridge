@@ -1,16 +1,24 @@
-import * as R from 'ramda';
 import { message } from 'telegraf/filters';
-//@ts-expect-error
 export function clearOldMessages(tgBot, offset = -1) {
     const timeout = 0;
     const limit = 100;
-    return tgBot.telegram.getUpdates(timeout, limit, offset, undefined).then(R.ifElse(R.isEmpty, R.always(undefined), 
-    // @ts-expect-error
-    R.compose(
-    //@ts-ignore
-    newOffset => clearOldMessages(tgBot, newOffset), R.add(1), R.prop("update_id"), R.last)));
+    return tgBot.telegram.getUpdates(timeout, limit, offset, undefined)
+        .then(function (updateArray) {
+        if (updateArray.length === 0) {
+            return undefined;
+        }
+        else {
+            const newOffset = updateArray[updateArray.length - 1].update_id + 1;
+            return clearOldMessages(tgBot, newOffset);
+        }
+    });
 }
-export const escapeHTMLSpecialChars = R.compose(R.replace(/>/g, "&gt;"), R.replace(/</g, "&lt;"), R.replace(/&/g, "&amp;"));
+export const escapeHTMLSpecialChars = (value) => {
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+};
 export function escapeChars(text) {
     return text
         .replace("*", "\\*")

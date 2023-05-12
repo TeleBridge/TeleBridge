@@ -1,5 +1,3 @@
-import { Message,  } from 'typegram';
-import * as R from 'ramda';
 import { Context, Telegraf } from 'telegraf';
 import { Update } from 'typegram';
 import { message } from 'telegraf/filters';
@@ -17,11 +15,12 @@ export function clearOldMessages(tgBot: Telegraf, offset = -1): any {
 			}
 		});
 }
-export const escapeHTMLSpecialChars = R.compose(
-	R.replace(/>/g, "&gt;"),
-	R.replace(/</g, "&lt;"),
-	R.replace(/&/g, "&amp;")
-);
+export const escapeHTMLSpecialChars = (value: string) => {
+	return value
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;");
+};
 export function escapeChars(text: string) {
 	return text
 		.replace("*", "\\*")

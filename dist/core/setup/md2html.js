@@ -1,6 +1,5 @@
 import simpleMarkdown from 'simple-markdown';
 import { escapeHTMLSpecialChars } from './main.js';
-import * as R from 'ramda';
 /***********
  * Helpers *
  ***********/
@@ -67,7 +66,7 @@ const mdParse = simpleMarkdown.defaultBlockParse;
 function md2html(text) {
     // XXX Some users get a space after @ in mentions bridged to Telegram. See #148
     // This is compensation for that discord error
-    text = R.replace("@\u200B", "@", R.defaultTo("", text));
+    text = (text || "").replace("@\u200B", "@");
     // Escape HTML in the input
     const processedText = escapeHTMLSpecialChars(text);
     // Parse the markdown and build HTML out of it
@@ -82,15 +81,12 @@ function md2html(text) {
         return content;
     })
         // Flatten the resulting structure
-        //@ts-expect-error
         .reduce((flattened, nodes) => flattened.concat([newlineNode, newlineNode], nodes), [])
         // Remove the two initial newlines created by the previous line
         .slice(2)
         .reduce((html, node) => {
-        //@ts-expect-error
         if (node.type === "br") {
             return html + "\n";
-            //@ts-expect-error
         }
         else if (node.type === "hr") {
             return html + "---";
@@ -98,7 +94,6 @@ function md2html(text) {
         // Turn the nodes into HTML
         // Telegram doesn't support nested tags, so only apply tags to the outer nodes
         // Get the tag type of this node
-        //@ts-expect-error
         const tags = tagMap[node.type];
         // Build the HTML
         return html + `${tags.start}${extractText(node)}${tags.end}`;
