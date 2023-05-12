@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "discord.js": "^14.11.0",
-    "dotenv": "^16.0.1",
+    "dotenv": "^16.0.3",
     "mongodb": "^5.1.0",
     "simple-markdown": "^0.7.3",
     "telegraf": "^4.12.2",
