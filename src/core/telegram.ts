@@ -4,6 +4,7 @@ import { channelPost, editedMessage, message } from "telegraf/filters"
 import { default as dsclient } from './discord.js'
 import { AttachmentBuilder, TextChannel } from 'discord.js'
 import { escapeChars, handleEditedUser, handleUser } from './setup/main.js'
+import { ChatMemberAdministrator } from 'typegram'
 
 const tgclient = new Telegraf(process.env.TGTOKEN)
 /*tgclient.telegram.getMe().then((botInfo) => {
@@ -13,9 +14,11 @@ tgclient.command('chatinfo', async (ctx) => {
   if (ctx.chat.type == 'private') return ctx.reply('This command can only be used in a group chat.')
   ctx.reply(`Chat ID: ${ctx.chat.id}\nChat Type: ${ctx.chat.type}\nChat Title: ${ctx.chat.title}`)
 })
+
 tgclient.command('delete', async (ctx) => {
   if (ctx.chat.id != parseInt(process.env.TGCHATID)) return;
-  if ((await ctx.getChatMember(ctx.from.id)).status !== 'creator' && (await ctx.getChatMember(ctx.from.id)).status !== 'administrator') return ctx.reply('You need to be an admin to use this command.')
+  const chatMember = await ctx.getChatMember(ctx.from.id) as ChatMemberAdministrator
+  if ((chatMember as any).status !== "creator" && !chatMember.can_delete_messages) return ctx.reply('You need to be an admin and have the permission to delete messages to use this command.')
   if (!ctx.message.reply_to_message) return ctx.reply('Please reply to a message to delete it.')
   const message = ctx.message.reply_to_message.message_id
   const messageid = await global.db.collection("messages").findOne({ telegram: message })
@@ -32,8 +35,6 @@ tgclient.command('delete', async (ctx) => {
 tgclient.start((ctx) => ctx.replyWithHTML('Welcome!\nThis is a self-hosted TeleBridge instance, for more info, check out the <a href="https://github.com/AntogamerYT/TeleBridge">GitHub Repo</a>'))
 tgclient.on('text', async (ctx) => {
   if (ctx.chat.id != parseInt(process.env.TGCHATID)) return;
-  console.log("got text")
-  // get user id
   let user = handleUser(ctx)
   if (!user) return;
   let username = user.username

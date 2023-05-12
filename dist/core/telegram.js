@@ -16,8 +16,9 @@ tgclient.command('chatinfo', async (ctx) => {
 tgclient.command('delete', async (ctx) => {
     if (ctx.chat.id != parseInt(process.env.TGCHATID))
         return;
-    if ((await ctx.getChatMember(ctx.from.id)).status !== 'creator' && (await ctx.getChatMember(ctx.from.id)).status !== 'administrator')
-        return ctx.reply('You need to be an admin to use this command.');
+    const chatMember = await ctx.getChatMember(ctx.from.id);
+    if (chatMember.status !== "creator" && !chatMember.can_delete_messages)
+        return ctx.reply('You need to be an admin and have the permission to delete messages to use this command.');
     if (!ctx.message.reply_to_message)
         return ctx.reply('Please reply to a message to delete it.');
     const message = ctx.message.reply_to_message.message_id;
@@ -37,8 +38,6 @@ tgclient.start((ctx) => ctx.replyWithHTML('Welcome!\nThis is a self-hosted TeleB
 tgclient.on('text', async (ctx) => {
     if (ctx.chat.id != parseInt(process.env.TGCHATID))
         return;
-    console.log("got text");
-    // get user id
     let user = handleUser(ctx);
     if (!user)
         return;
