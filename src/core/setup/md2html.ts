@@ -75,7 +75,7 @@ const mdParse = simpleMarkdown.defaultBlockParse;
  *
  * @return {String}     Telegram-friendly HTML
  */
-function md2html(text: string) {
+function md2html(text: string): string {
         // XXX Some users get a space after @ in mentions bridged to Telegram. See #148
         // This is compensation for that discord error
         text = (text || "").replace("@\u200B", "@");

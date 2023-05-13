@@ -1,9 +1,9 @@
 import 'dotenv/config'
 import { Telegraf } from 'telegraf'
-import { channelPost, editedMessage } from "telegraf/filters"
+import { channelPost, editedMessage, message } from "telegraf/filters"
 import { default as dsclient } from './discord.js'
 import { AttachmentBuilder, TextChannel } from 'discord.js'
-import { escapeChars, handleEditedUser, handleUser } from './setup/main.js'
+import { GenerateBase64Waveform, escapeChars, handleEditedUser, handleUser } from './setup/main.js'
 import { ChatMemberAdministrator } from 'typegram'
 
 const tgclient = new Telegraf(process.env.TGTOKEN)
@@ -288,21 +288,21 @@ tgclient.on('voice', async (ctx) => {
     }).then(res => res.json())
 
     await fetch(attachment.attachments[0].upload_url, { method: "PUT", body: voice })
-    //const waveform = await GenerateBase64Waveform(link.href)
+    const waveform = await GenerateBase64Waveform(link.href)
+
 
     if (msgid) {
       const msg = await (dsclient.channels.cache.get(process.env.DISCORDCHANNELID) as TextChannel).messages.fetch(msgid.discord)
-      // await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: [attachment] })
+      await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n Voice Message ⬇️`})
       const res = await fetch("https://discord.com/api/v10/channels/" + process.env.DISCORDCHANNELID + "/messages", {
         method: "POST",
         body: JSON.stringify({
-          //content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`,
           attachments: [{
             id: 0,
             filename: "voice-message.ogg",
             "uploaded_filename": attachment.attachments[0].upload_filename,
             "duration_secs": ctx.message.voice.duration,
-            waveform: "AB=="//waveform
+            waveform: waveform
           }],
           message_reference: {
             message_id: msg.id,
@@ -323,17 +323,17 @@ tgclient.on('voice', async (ctx) => {
       return;
     }
 
-    //const msg = await (await dsclient.channels.cache.get(process.env.DISCORDCHANNELID) as TextChannel).send({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: [attachment] });
+    (dsclient.channels.cache.get(process.env.DISCORDCHANNELID) as TextChannel).send({ content: `**${escapeChars(username)}** ${extraargs}:\n Voice Message ⬇️` })
+    
     const res = await fetch("https://discord.com/api/v10/channels/" + process.env.DISCORDCHANNELID + "/messages", {
       method: "POST",
       body: JSON.stringify({
-        //content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`,
         attachments: [{
           id: 0,
           filename: "voice-message.ogg",
           "uploaded_filename": attachment.attachments[0].upload_filename,
           "duration_secs": ctx.message.voice.duration,
-          waveform: "AB=="//waveform
+          waveform: waveform
         }],
         flags: 8192
       }),

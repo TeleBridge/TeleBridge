@@ -7,9 +7,11 @@ dsclient.on('ready', () => {
     dsclient.channels.cache.get(process.env.DISCORDCHANNELID).send('Discord Client ready and logged in as ' + dsclient?.user?.tag + '.');
 });
 dsclient.on('messageCreate', async (message) => {
-    if (message.author.bot)
+    if (process.env.IGNOREBOTS === 'true' && message.author.bot)
         return;
-    if (message.channel.id != process.env.DISCORDCHANNELID)
+    if (message.author.id === dsclient.user?.id)
+        return;
+    if (message.channel.id !== process.env.DISCORDCHANNELID)
         return;
     let attachmentarray = [];
     message.attachments.forEach(async ({ url }) => {
@@ -28,10 +30,21 @@ dsclient.on('messageCreate', async (message) => {
     if (message.reference) {
         const msgid = await global.db.collection('messages').findOne({ discord: message.reference.messageId });
         if (msgid) {
+            // check if message contains the 8192 flag (voice message)
+            if (message.flags.toArray().includes("IsVoiceMessage")) {
+                const msg = await tgclient.telegram.sendVoice(process.env.TGCHATID, message.attachments.first()?.url ?? '', { reply_to_message_id: parseInt(msgid.telegram), caption: `<b>${message.author.tag}</b>:\n${msgcontent}`, parse_mode: 'HTML' });
+                await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id });
+                return;
+            }
             const msg = await tgclient.telegram.sendMessage(process.env.TGCHATID, `<b>${message.author.tag}</b>:\n${msgcontent} ${string}`, { parse_mode: 'HTML', reply_to_message_id: parseInt(msgid.telegram) });
             await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id });
             return;
         }
+    }
+    if (message.flags.toArray().includes("IsVoiceMessage")) {
+        const msg = await tgclient.telegram.sendVoice(process.env.TGCHATID, message.attachments.first()?.url ?? '', { caption: `<b>${message.author.tag}</b>:\n${msgcontent}`, parse_mode: 'HTML' });
+        await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id });
+        return;
     }
     const msg = await tgclient.telegram.sendMessage(process.env.TGCHATID, `<b>${message.author.tag}</b>:\n${msgcontent} ${string}`, { parse_mode: 'HTML' });
     await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id });
@@ -39,21 +52,26 @@ dsclient.on('messageCreate', async (message) => {
 dsclient.on('messageDelete', async (message) => {
     if (!message.author)
         return;
-    if (message.author.bot && message.author.id != dsclient?.user?.id)
+    if (message.author.id === dsclient?.user?.id)
+        return;
+    if (process.env.IGNOREBOTS === 'true' && message.author.bot)
         return;
     if (message.channel.id !== process.env.DISCORDCHANNELID)
         return;
     const messageid = await global.db.collection('messages').findOne({ discord: message.id });
-    console.log(messageid);
     if (messageid) {
         await tgclient.telegram.deleteMessage(process.env.TGCHATID, parseInt(messageid.telegram));
         await global.db.collection('messages').deleteOne({ discord: message.id });
     }
 });
 dsclient.on("messageUpdate", async (oM, nM) => {
-    if (!oM.author || !nM.author || oM.author.bot)
+    if (!oM.author || !nM.author)
         return;
-    if (oM.channel.id != process.env.DISCORDCHANNELID)
+    if (process.env.IGNOREBOTS === 'true' && oM.author.bot)
+        return;
+    if (oM.author.id === dsclient.user?.id)
+        return;
+    if (oM.channel.id !== process.env.DISCORDCHANNELID)
         return;
     const messageid = await global.db.collection('messages').findOne({ discord: oM.id });
     if (messageid) {

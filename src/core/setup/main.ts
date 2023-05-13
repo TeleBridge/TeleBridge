@@ -1,8 +1,6 @@
 import { Context, Telegraf } from 'telegraf';
 import { Update } from 'typegram';
 import { message } from 'telegraf/filters';
-import { exec } from 'child_process';
-import fs from 'fs'
 
 
 export function clearOldMessages(tgBot: Telegraf, offset = -1): any {
@@ -54,7 +52,7 @@ export function handleUser(ctx: Context) {
 		}
 	}
 	if (ctx.has(message("text")) && ctx.message.is_automatic_forward) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.message.forward_sender_name }
-	//@ts-ignore until i find a better way to do this it will stay like this
+	//@ts-expect-error until i find a better way to do this it will stay like this
 	if (ctx.has(message("forward_from_chat"))) { extraargs = `(Forwarded from ${username})`; username = ctx.message.forward_from_chat.title }
 	if (ctx.has(message("text")) && ctx.message.forward_from) { extraargs = `(Forwarded by **${ctx.message.forward_from.username}**)`; }
 	if (userreply) { extraargs = `(Replying to ${userreply})`; }
@@ -90,7 +88,6 @@ export function handleEditedUser(ctx: any) {
 		}
 	}
 	if (ctx.has(message("text")) && ctx.editedMessage.is_automatic_forward) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.editedMessage.forward_sender_name }
-	//@ts-ignore until i find a better way to do this it will stay like this
 	if (ctx.has(message("forward_from_chat"))) { extraargs = `(Forwarded from ${username})`; username = ctx.editedMessage.forward_from_chat.title }
 	if (ctx.has(message("text")) && ctx.editedMessage.forward_from) { extraargs = `(Forwarded by **${ctx.editedMessage.forward_from.username}**)`; }
 	if (userreply) { extraargs = `(Replying to ${userreply})`; }
@@ -104,36 +101,9 @@ export function handleEditedUser(ctx: any) {
 
 // Doesn't work with discord, don't even bother trying
 // if you still want to do some fuckery with this code, install https://github.com/bbc/audiowaveform
+// NVM IT'S A LOT EASIER THAN I THOUGHT
 export async function GenerateBase64Waveform(audioUrl: string): Promise<string> {
-	return new Promise<string>(async (resolve, reject) => {
+	const audioData = await (await fetch(audioUrl)).text()
 
-		const audioFilePath = process.cwd() + "/tmp/" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + '.ogg';
-
-		if (!fs.existsSync(process.cwd() + "/tmp/")) fs.mkdirSync(process.cwd() + "/tmp/")
-
-		const response = await fetch(audioUrl);
-		const buffer = Buffer.from(await response.arrayBuffer());
-
-		fs.writeFileSync(audioFilePath, buffer);
-
-		const command = `audiowaveform -i ${audioFilePath} -b 8 -o ${audioFilePath.replace("ogg", "json")}`;
-
-		exec(command, { encoding: 'buffer' }, (error, stdout) => {
-			if (error) {
-				reject(error);
-				return;
-			}
-
-			const file = fs.readFileSync(audioFilePath.replace("ogg", "json"));
-			const waveform = JSON.parse(file.toString());
-
-			const normalizedWaveform = Array.from(waveform.data).map((sample: any) => Math.floor(sample));
-			const base64EncodedData = Buffer.from(normalizedWaveform).toString('base64');
-			console.log(base64EncodedData)
-
-			resolve(base64EncodedData);
-			fs.unlinkSync(audioFilePath);
-			fs.unlinkSync(audioFilePath.replace("ogg", "json"));
-		});
-	});
+	return Buffer.from(audioData.slice(0, 100)).toString('base64')
 }

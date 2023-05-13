@@ -4,7 +4,6 @@ import { channelPost, editedMessage } from "telegraf/filters";
 import { default as dsclient } from './discord.js';
 import { AttachmentBuilder } from 'discord.js';
 import { GenerateBase64Waveform, escapeChars, handleEditedUser, handleUser } from './setup/main.js';
-import fs from 'fs';
 const tgclient = new Telegraf(process.env.TGTOKEN);
 /*tgclient.telegram.getMe().then((botInfo) => {
   tgclient.options.username = botInfo.username
@@ -271,14 +270,12 @@ tgclient.on('voice', async (ctx) => {
     let image = ctx.message.voice.file_id;
     let link = await ctx.telegram.getFileLink(image);
     let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/voice\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/voice\//gmi, '');
-    // const attachment = new AttachmentBuilder(link.href, { name: filename, id: 0, })
     let msgid;
     if (ctx.message.reply_to_message) {
         msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id });
     }
     try {
         const voice = await fetch(link.href).then(res => res.arrayBuffer());
-        console.log(link.href);
         const attachment = await fetch("https://discord.com/api/v10/channels/" + process.env.DISCORDCHANNELID + "/attachments", {
             method: "POST",
             body: JSON.stringify({
@@ -293,30 +290,28 @@ tgclient.on('voice', async (ctx) => {
                 "Authorization": "Bot " + dsclient.token
             }
         }).then(res => res.json());
-        console.log(attachment);
         await fetch(attachment.attachments[0].upload_url, { method: "PUT", body: voice });
         const waveform = await GenerateBase64Waveform(link.href);
         if (msgid) {
             const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);
-            // await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: [attachment] }) in a normal fetch request
+            await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n Voice Message ⬇️` });
             const res = await fetch("https://discord.com/api/v10/channels/" + process.env.DISCORDCHANNELID + "/messages", {
                 method: "POST",
                 body: JSON.stringify({
-                    content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`,
+                    //content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`,
                     attachments: [{
                             id: 0,
                             filename: "voice-message.ogg",
                             "uploaded_filename": attachment.attachments[0].upload_filename,
-                            // calculate voice message duration in seconds
                             "duration_secs": ctx.message.voice.duration,
-                            // create waveform (base64 encoded bytes 0 to 255 of each waveform point. Can be filled with zeros.) keep in mind that it doesn't exist on telegram and you must calculate it manually
-                            waveform: waveform
+                            waveform: waveform //waveform
                         }],
                     message_reference: {
                         message_id: msg.id,
                         channel_id: msg.channel.id,
                         guild_id: msg.guild.id
-                    }
+                    },
+                    flags: 8192
                 }),
                 headers: {
                     'x-super-properties': 'eyJvcyI6IldpbmRvd3MiLCJjbGllbnRfYnVpbGRfbnVtYmVyIjo5OTk5OTk5fQ==',
@@ -327,17 +322,17 @@ tgclient.on('voice', async (ctx) => {
             await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: res.id });
             return;
         }
-        //const msg = await (await dsclient.channels.cache.get(process.env.DISCORDCHANNELID) as TextChannel).send({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: [attachment] });
+        dsclient.channels.cache.get(process.env.DISCORDCHANNELID).send({ content: `**${escapeChars(username)}** ${extraargs}:\n Voice Message ⬇️` });
         const res = await fetch("https://discord.com/api/v10/channels/" + process.env.DISCORDCHANNELID + "/messages", {
             method: "POST",
             body: JSON.stringify({
-                content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`,
+                //content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`,
                 attachments: [{
                         id: 0,
                         filename: "voice-message.ogg",
                         "uploaded_filename": attachment.attachments[0].upload_filename,
                         "duration_secs": ctx.message.voice.duration,
-                        waveform: "AB==" //waveform
+                        waveform: waveform //waveform
                     }],
                 flags: 8192
             }),
@@ -347,12 +342,9 @@ tgclient.on('voice', async (ctx) => {
                 "Authorization": "Bot " + dsclient.token
             }
         }).then(res => res.json());
-        // log the whole res without [Object] and stuff
-        fs.writeFileSync("res.json", JSON.stringify(res, null, 2));
         await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: res.id });
     }
     catch (error) {
-        console.log(error);
         const message = await ctx.replyWithHTML('<i>Error: the file couldn\'t be processed because it exceeds Discord\'s maximum file size (8MB)</i>');
         if (msgid) {
             const msg = await dsclient.channels.cache.get(process.env.DISCORDCHANNELID).messages.fetch(msgid.discord);

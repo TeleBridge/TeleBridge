@@ -16,3 +16,12 @@ telegram.launch();
 discord.login(process.env.DISCORDTOKEN);
 await client.connect();
 global.db = client.db();
+/**
+ * example db object for reference
+ * {
+ *  "discord": "messageid",
+ *  "telegram": "messageid"
+ * }
+ */
+if (!process.env.IGNOREBOTS)
+    process.env.IGNOREBOTS = 'true';
