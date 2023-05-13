@@ -1,4 +1,6 @@
 import { message } from 'telegraf/filters';
+import { exec } from 'child_process';
+import fs from 'fs';
 export function clearOldMessages(tgBot, offset = -1) {
     const timeout = 0;
     const limit = 100;
@@ -117,4 +119,58 @@ export function handleEditedUser(ctx) {
     if (username === undefined)
         username = '';
     return { username, userreply, extraargs };
+}
+/*export async function GenerateWaveform(audioUrl: string) { // 🤯
+    
+    const audioContext = new AudioContext();
+    const audioData = await fetch(audioUrl)
+        .then(response => response.arrayBuffer())
+    
+    const audioBuffer = await audioContext.decodeAudioData(audioData)
+
+    const analyserNode = audioContext.createAnalyser();
+    analyserNode.fftSize = 2048;
+    const bufferlength = analyserNode.frequencyBinCount;
+    const waveformdata = new Uint8Array(bufferlength);
+
+    const sourceNode = audioContext.createBufferSource();
+
+    sourceNode.buffer = audioBuffer;
+    sourceNode.connect(analyserNode);
+    analyserNode.connect(audioContext.destination);
+    sourceNode.start();
+
+    function updateWaveform() {
+        analyserNode.getByteTimeDomainData(waveformdata);
+
+        return btoa(String.fromCharCode(...waveformdata));
+    }
+
+    return updateWaveform()
+}*/
+export async function GenerateBase64Waveform(audioUrl) {
+    return new Promise(async (resolve, reject) => {
+        // save audio to temp path
+        const audioFilePath = process.cwd() + "/tmp/" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + '.ogg';
+        if (!fs.existsSync(process.cwd() + "/tmp/"))
+            fs.mkdirSync(process.cwd() + "/tmp/");
+        const response = await fetch(audioUrl);
+        const buffer = Buffer.from(await response.arrayBuffer());
+        fs.writeFileSync(audioFilePath, buffer);
+        const command = `audiowaveform -i ${audioFilePath} -b 8 -o ${audioFilePath.replace("ogg", "json")}`;
+        exec(command, { encoding: 'buffer' }, (error, stdout) => {
+            if (error) {
+                reject(error);
+                return;
+            }
+            const file = fs.readFileSync(audioFilePath.replace("ogg", "json"));
+            const waveform = JSON.parse(file.toString());
+            const normalizedWaveform = Array.from(waveform.data).map((sample) => Math.floor(sample));
+            const base64EncodedData = Buffer.from(normalizedWaveform).toString('base64');
+            console.log(base64EncodedData);
+            resolve(base64EncodedData);
+            fs.unlinkSync(audioFilePath);
+            fs.unlinkSync(audioFilePath.replace("ogg", "json"));
+        });
+    });
 }

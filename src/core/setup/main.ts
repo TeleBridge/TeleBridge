@@ -1,6 +1,9 @@
 import { Context, Telegraf } from 'telegraf';
 import { Update } from 'typegram';
 import { message } from 'telegraf/filters';
+import { exec } from 'child_process';
+import fs from 'fs'
+
 
 export function clearOldMessages(tgBot: Telegraf, offset = -1): any {
 	const timeout = 0;
@@ -96,4 +99,41 @@ export function handleEditedUser(ctx: any) {
 	if (username === undefined) username = '';
 	return {username, userreply, extraargs}
 
+}
+
+
+// Doesn't work with discord, don't even bother trying
+// if you still want to do some fuckery with this code, install https://github.com/bbc/audiowaveform
+export async function GenerateBase64Waveform(audioUrl: string): Promise<string> {
+	return new Promise<string>(async(resolve, reject) => {
+
+		const audioFilePath = process.cwd() + "/tmp/" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + '.ogg';
+
+		if(!fs.existsSync(process.cwd() + "/tmp/")) fs.mkdirSync(process.cwd() + "/tmp/")
+		
+		const response = await fetch(audioUrl);
+		const buffer = Buffer.from(await response.arrayBuffer());
+
+		fs.writeFileSync(audioFilePath, buffer);
+
+		const command = `audiowaveform -i ${audioFilePath} -b 8 -o ${audioFilePath.replace("ogg", "json")}`;
+
+		exec(command, { encoding: 'buffer' }, (error, stdout) => {
+			if (error) {
+				reject(error);
+				return;
+			}
+
+			const file = fs.readFileSync(audioFilePath.replace("ogg", "json"));
+			const waveform = JSON.parse(file.toString());
+
+			const normalizedWaveform = Array.from(waveform.data).map((sample: any) => Math.floor(sample));
+			const base64EncodedData = Buffer.from(normalizedWaveform).toString('base64');
+			console.log(base64EncodedData)
+
+			resolve(base64EncodedData);
+			fs.unlinkSync(audioFilePath);
+			fs.unlinkSync(audioFilePath.replace("ogg", "json"));
+		});
+	});
 }
