@@ -1,4 +1,13 @@
 {
+  "name": "telebridge",
+  "displayName": "TeleBridge",
+  "version": "2.5.3",
+  "description": "A bridge between Telegram and Discord",
+  "license": "GNU",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AntogamerYT/TeleBridge.git"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js"
