@@ -18,6 +18,8 @@ Do you want to try the bot before self-hosting it? [Join my Discord server](http
 ![](https://cdn.antogamer.it/r/msedge_02pF29B5Bz.png)
 
 - Fill out the [.env.example](https://github.com/AntogamerYT/TeleBridge/blob/master/.env.example) and rename it into `.env`
+- Also fill the [example.config.json](https://github.com/AntogamerYT/TeleBridge/blob/master/example.config.json) and rename it into `config.json`
+    PRO Tip: You can add more bridges by simply adding more objects in `bridges`
 - Run `npm install` to install the required packages
 - Run `npm run build` to build the code, then `npm start` and (if everything was done correctly) the bot will be up and ready to use!
 
