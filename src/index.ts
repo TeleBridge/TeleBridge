@@ -28,7 +28,8 @@ telegram.launch()
 discord.login(process.env.DISCORDTOKEN)
 await client.connect();
 const ConfigFile = fs.readFileSync(`${process.cwd()}/config.json`, 'utf-8');
-if (!ConfigFile) throw new Error('Config file not found')
+if (!ConfigFile && !JSON.parse(ConfigFile)) throw new Error('Config file not found')
+if (JSON.parse(ConfigFile).bridges.length === 0) throw new Error('No bridges found in the config file')
 global.config = JSON.parse(ConfigFile);
 global.db = client.db()
 
