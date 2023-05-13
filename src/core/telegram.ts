@@ -1,11 +1,10 @@
 import 'dotenv/config'
 import { Telegraf } from 'telegraf'
-import { channelPost, editedMessage  } from "telegraf/filters"
+import { channelPost, editedMessage } from "telegraf/filters"
 import { default as dsclient } from './discord.js'
 import { AttachmentBuilder, TextChannel } from 'discord.js'
-import { GenerateBase64Waveform, escapeChars, handleEditedUser, handleUser } from './setup/main.js'
+import { escapeChars, handleEditedUser, handleUser } from './setup/main.js'
 import { ChatMemberAdministrator } from 'typegram'
-import fs from 'fs'
 
 const tgclient = new Telegraf(process.env.TGTOKEN)
 /*tgclient.telegram.getMe().then((botInfo) => {
@@ -166,9 +165,9 @@ tgclient.on('photo', async (ctx) => {
   }
   let msgid;
   try {
-  if (ctx.message.reply_to_message) {
-    msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id })
-  }
+    if (ctx.message.reply_to_message) {
+      msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id })
+    }
 
     if (msgid) {
       const msg = await (dsclient.channels.cache.get(process.env.DISCORDCHANNELID) as TextChannel).messages.fetch(msgid.discord)
@@ -214,13 +213,13 @@ tgclient.on('video', async (ctx) => {
   }
   let image = ctx.message.video.file_id;
   let msgid;
-try {
-  let link = await ctx.telegram.getFileLink(image);
-  let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/videos\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/videos\//gmi, '')
-  const attachment = new AttachmentBuilder(link.href, { name: filename })
-  if (ctx.message.reply_to_message) {
-    msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id })
-  }
+  try {
+    let link = await ctx.telegram.getFileLink(image);
+    let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/videos\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/videos\//gmi, '')
+    const attachment = new AttachmentBuilder(link.href, { name: filename })
+    if (ctx.message.reply_to_message) {
+      msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id })
+    }
     if (msgid) {
       const msg = await (dsclient.channels.cache.get(process.env.DISCORDCHANNELID) as TextChannel).messages.fetch(msgid.discord)
       await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: [attachment] })
@@ -264,9 +263,7 @@ tgclient.on('voice', async (ctx) => {
   let image = ctx.message.voice.file_id;
   let link = await ctx.telegram.getFileLink(image);
   let filename = link.href.match(/https?:\/\/api\.telegram\.org\/file\/.*\/voice\/.*\..*/gmi)?.[0]?.replaceAll(/https?:\/\/api\.telegram\.org\/file\/.*\/voice\//gmi, '')
- // const attachment = new AttachmentBuilder(link.href, { name: filename, id: 0, })
 
-  
   let msgid;
   if (ctx.message.reply_to_message) {
     msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id })
@@ -320,7 +317,7 @@ tgclient.on('voice', async (ctx) => {
           "Authorization": "Bot " + dsclient.token
         }
       }).then(res => res.json())
-    
+
 
       await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: res.id })
       return;
@@ -405,7 +402,7 @@ tgclient.on('document', async (ctx) => {
     const message = await ctx.replyWithHTML('<i>Error: the file couldn\'t be processed because it exceeds Discord\'s maximum file size (8MB)</i>')
     if (msgid) {
       const msg = await (dsclient.channels.cache.get(process.env.DISCORDCHANNELID) as TextChannel).messages.fetch(msgid.discord)
-      await msg.reply({content: `**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`, allowedMentions: { repliedUser: true } })
+      await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`, allowedMentions: { repliedUser: true } })
       await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id })
       return;
     }

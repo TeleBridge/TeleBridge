@@ -1,5 +1,5 @@
 import simpleMarkdown from 'simple-markdown'
-import {escapeHTMLSpecialChars} from './main.js'
+import { escapeHTMLSpecialChars } from './main.js'
 
 /***********
  * Helpers *
@@ -114,7 +114,7 @@ function md2html(text: string) {
 
                         // Build the HTML
                         return html + `${tags.start}${extractText(node)}${tags.end}`
-                        
+
                 }, "");
 
         return html;

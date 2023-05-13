@@ -1,6 +1,6 @@
-import {clearOldMessages} from './core/setup/main.js';
+import { clearOldMessages } from './core/setup/main.js';
 import { config as DotEnvConfig } from "dotenv";
-import {Db, MongoClient} from 'mongodb'
+import { Db, MongoClient } from 'mongodb'
 DotEnvConfig({
     path: `${process.cwd()}/.env`
 })
@@ -26,8 +26,9 @@ global.db = client.db()
  * }
  */
 
+if (!process.env.IGNOREBOTS) process.env.IGNOREBOTS = 'true';
+
 declare global {
-    // my eyes are burning
     var db: Db;
     namespace NodeJS {
         interface ProcessEnv {
@@ -37,6 +38,7 @@ declare global {
             TGUSERNAME: string;
             DISCORDCHANNELID: string;
             MONGO_URI: string;
+            IGNOREBOTS: string;
         }
     }
 }

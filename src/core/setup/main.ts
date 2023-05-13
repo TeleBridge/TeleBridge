@@ -35,33 +35,33 @@ export function handleUser(ctx: Context) {
 	let userreply;
 	let extraargs;
 	if (!ctx.message || !ctx.chat) return undefined;
-    switch (ctx.message.from.username) {
-      case undefined:
-        username = ctx.message.from.first_name;
-        break;
-      default:
-        username = ctx.message.from.username;
-        break;
-    }
-    if(ctx.has(message("text")) && ctx.message.reply_to_message != undefined) {
+	switch (ctx.message.from.username) {
+		case undefined:
+			username = ctx.message.from.first_name;
+			break;
+		default:
+			username = ctx.message.from.username;
+			break;
+	}
+	if (ctx.has(message("text")) && ctx.message.reply_to_message != undefined) {
 		switch (ctx.message.reply_to_message.from?.username) {
-        case undefined:
-          userreply = ctx.message.reply_to_message.from?.first_name;
-          break;
-        default:
-          userreply = ctx.message.reply_to_message.from?.username;
-          break;
-      }
-    }
+			case undefined:
+				userreply = ctx.message.reply_to_message.from?.first_name;
+				break;
+			default:
+				userreply = ctx.message.reply_to_message.from?.username;
+				break;
+		}
+	}
 	if (ctx.has(message("text")) && ctx.message.is_automatic_forward) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.message.forward_sender_name }
 	//@ts-ignore until i find a better way to do this it will stay like this
-	if (ctx.has(message("forward_from_chat"))) { extraargs = `(Forwarded from ${username})`; username = ctx.message.forward_from_chat.title}
-	if (ctx.has(message("text")) && ctx.message.forward_from){ extraargs = `(Forwarded by **${ctx.message.forward_from.username}**)`;}
-	if (userreply){ extraargs = `(Replying to ${userreply})`; }
+	if (ctx.has(message("forward_from_chat"))) { extraargs = `(Forwarded from ${username})`; username = ctx.message.forward_from_chat.title }
+	if (ctx.has(message("text")) && ctx.message.forward_from) { extraargs = `(Forwarded by **${ctx.message.forward_from.username}**)`; }
+	if (userreply) { extraargs = `(Replying to ${userreply})`; }
 	if (extraargs === undefined) extraargs = '';
 	if (userreply === undefined) userreply = '';
 	if (username === undefined) username = '';
-	return {username, userreply, extraargs}
+	return { username, userreply, extraargs }
 
 }
 
@@ -72,32 +72,32 @@ export function handleEditedUser(ctx: any) {
 	let extraargs;
 	if (!ctx.editedMessage || !ctx.chat) return undefined;
 	switch (ctx.editedMessage.from.username) {
-	  case undefined:
-		username = ctx.editedMessage.from.first_name;
-		break;
-	  default:
-		username = ctx.editedMessage.from.username;
-		break;
-	}
-	if(ctx.has(message("text")) && ctx.editedMessage.reply_to_message != undefined) {
-		switch (ctx.editedMessage.reply_to_message.from?.username) {
 		case undefined:
-		  userreply = ctx.editedMessage.reply_to_message.from?.first_name;
-		  break;
+			username = ctx.editedMessage.from.first_name;
+			break;
 		default:
-		  userreply = ctx.editedMessage.reply_to_message.from?.username;
-		  break;
-	  }
+			username = ctx.editedMessage.from.username;
+			break;
+	}
+	if (ctx.has(message("text")) && ctx.editedMessage.reply_to_message != undefined) {
+		switch (ctx.editedMessage.reply_to_message.from?.username) {
+			case undefined:
+				userreply = ctx.editedMessage.reply_to_message.from?.first_name;
+				break;
+			default:
+				userreply = ctx.editedMessage.reply_to_message.from?.username;
+				break;
+		}
 	}
 	if (ctx.has(message("text")) && ctx.editedMessage.is_automatic_forward) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.editedMessage.forward_sender_name }
 	//@ts-ignore until i find a better way to do this it will stay like this
-	if (ctx.has(message("forward_from_chat"))) { extraargs = `(Forwarded from ${username})`; username = ctx.editedMessage.forward_from_chat.title}
-	if (ctx.has(message("text")) && ctx.editedMessage.forward_from){ extraargs = `(Forwarded by **${ctx.editedMessage.forward_from.username}**)`;}
+	if (ctx.has(message("forward_from_chat"))) { extraargs = `(Forwarded from ${username})`; username = ctx.editedMessage.forward_from_chat.title }
+	if (ctx.has(message("text")) && ctx.editedMessage.forward_from) { extraargs = `(Forwarded by **${ctx.editedMessage.forward_from.username}**)`; }
 	if (userreply) { extraargs = `(Replying to ${userreply})`; }
 	if (extraargs === undefined) extraargs = '';
 	if (userreply === undefined) userreply = '';
 	if (username === undefined) username = '';
-	return {username, userreply, extraargs}
+	return { username, userreply, extraargs }
 
 }
 
@@ -105,12 +105,12 @@ export function handleEditedUser(ctx: any) {
 // Doesn't work with discord, don't even bother trying
 // if you still want to do some fuckery with this code, install https://github.com/bbc/audiowaveform
 export async function GenerateBase64Waveform(audioUrl: string): Promise<string> {
-	return new Promise<string>(async(resolve, reject) => {
+	return new Promise<string>(async (resolve, reject) => {
 
 		const audioFilePath = process.cwd() + "/tmp/" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + '.ogg';
 
-		if(!fs.existsSync(process.cwd() + "/tmp/")) fs.mkdirSync(process.cwd() + "/tmp/")
-		
+		if (!fs.existsSync(process.cwd() + "/tmp/")) fs.mkdirSync(process.cwd() + "/tmp/")
+
 		const response = await fetch(audioUrl);
 		const buffer = Buffer.from(await response.arrayBuffer());
 
