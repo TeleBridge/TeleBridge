@@ -1,0 +1,24 @@
+{
+    "bridges": [
+        {
+            "name": "Cool Bridge",
+            "discord": {
+                "chat_id": "123456789012345678"
+            },
+            "telegram": {
+                "chat_id": "-1001234567890"
+            },
+            "hide": false 
+        },
+        {
+            "name": "CIA Top Secret Bridge",
+            "discord": {
+                "chat_id": "123456789012345678"
+            },
+            "telegram": {
+                "chat_id": "-1001234567890"
+            },
+            "hide": true
+        }
+    ]
+}

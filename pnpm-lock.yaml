@@ -1,11 +1,14 @@
 lockfileVersion: '6.0'
 
 dependencies:
+  chalk:
+    specifier: ^5.2.0
+    version: 5.2.0
   discord.js:
     specifier: ^14.11.0
     version: 14.11.0
   dotenv:
-    specifier: ^16.0.1
+    specifier: ^16.0.3
     version: 16.0.3
   mongodb:
     specifier: ^5.1.0
@@ -183,6 +186,11 @@ packages:
     engines: {node: '>=10.16.0'}
     dependencies:
       streamsearch: 1.1.0
+    dev: false
+
+  /chalk@5.2.0:
+    resolution: {integrity: sha512-ree3Gqw/nazQAPuJJEy+avdl7QfZMcUvmHIKgEZkGL+xOBzRvup5Hxo6LHuMceSxOabuJLJm5Yp/92R9eMmMvA==}
+    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
     dev: false
 
   /csstype@3.1.1:

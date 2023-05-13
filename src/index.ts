@@ -1,13 +1,24 @@
 import { clearOldMessages } from './core/setup/main.js';
 import { config as DotEnvConfig } from "dotenv";
 import { Db, MongoClient } from 'mongodb'
+import chalk from 'chalk'
 DotEnvConfig({
     path: `${process.cwd()}/.env`
 })
 
-// Load discord client and telegram client from the core/ folder
 import discord from './core/discord.js';
 import telegram from './core/telegram.js';
+import fs from 'fs';
+
+const GHpackageJson = await (await fetch("https://raw.githubusercontent.com/AntogamerYT/TeleBridge/master/package.json")).json()
+const packageJson = JSON.parse(fs.readFileSync(`${process.cwd()}/package.json`, 'utf-8'))
+
+if (GHpackageJson.version !== packageJson.version) {
+    console.log(chalk.yellow('New version available, it\'s reccomended to update'))
+    console.log(chalk.yellow('Current version: ' + packageJson.version))
+    console.log(chalk.yellow('New version: ' + GHpackageJson.version))
+}
+
 process.on('uncaughtException', (err) => {
     console.log(err);
 })
@@ -16,13 +27,20 @@ await clearOldMessages(telegram)
 telegram.launch()
 discord.login(process.env.DISCORDTOKEN)
 await client.connect();
+const ConfigFile = fs.readFileSync(`${process.cwd()}/config.json`, 'utf-8');
+if (!ConfigFile) throw new Error('Config file not found')
+global.config = JSON.parse(ConfigFile);
 global.db = client.db()
 
 /**
  * example db object for reference
  * {
  *  "discord": "messageid",
- *  "telegram": "messageid"
+ *  "telegram": "messageid",
+ *  "chatIds": {
+ *     "discord": "chatid",
+ *     "telegram": "chatid"
+ *   }
  * }
  */
 
@@ -30,6 +48,7 @@ if (!process.env.IGNOREBOTS) process.env.IGNOREBOTS = 'true';
 
 declare global {
     var db: Db;
+    var config: Config;
     namespace NodeJS {
         interface ProcessEnv {
             DISCORDTOKEN: string;
@@ -43,6 +62,18 @@ declare global {
     }
 }
 
+interface Config {
+    bridges: {
+        name: string;
+        discord: {
+            chat_id: string;
+        },
+        telegram: {
+            chat_id: string;
+        },
+        hide: boolean;
+    }[]
+}
 
 
 declare module 'telegraf';

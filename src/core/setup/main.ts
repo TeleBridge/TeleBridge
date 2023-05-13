@@ -33,6 +33,10 @@ export function handleUser(ctx: Context) {
 	let userreply;
 	let extraargs;
 	if (!ctx.message || !ctx.chat) return undefined;
+	let forwardFromChatTitle: string = "";
+	if (ctx.has(message("forward_from_chat")) && ctx.message.forward_from_chat.type === "private") forwardFromChatTitle = ctx.message.forward_from_chat.first_name;
+	if (ctx.has(message("forward_from_chat")) && ctx.message.forward_from_chat.type === "group") forwardFromChatTitle = ctx.message.forward_from_chat.title;
+	if (ctx.chat.type === "private") return undefined;
 	switch (ctx.message.from.username) {
 		case undefined:
 			username = ctx.message.from.first_name;
@@ -52,8 +56,7 @@ export function handleUser(ctx: Context) {
 		}
 	}
 	if (ctx.has(message("text")) && ctx.message.is_automatic_forward) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.message.forward_sender_name }
-	//@ts-expect-error until i find a better way to do this it will stay like this
-	if (ctx.has(message("forward_from_chat"))) { extraargs = `(Forwarded from ${username})`; username = ctx.message.forward_from_chat.title }
+	if (ctx.has(message("forward_from_chat"))) { extraargs = `(Forwarded from ${username})`; username = forwardFromChatTitle }
 	if (ctx.has(message("text")) && ctx.message.forward_from) { extraargs = `(Forwarded by **${ctx.message.forward_from.username}**)`; }
 	if (userreply) { extraargs = `(Replying to ${userreply})`; }
 	if (extraargs === undefined) extraargs = '';
