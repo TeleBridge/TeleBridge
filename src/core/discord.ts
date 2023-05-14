@@ -1,6 +1,7 @@
 import Discord, { APIEmbed, ActivityType, Routes, TextChannel } from 'discord.js';
 import { default as tgclient } from './telegram.js'
 import 'dotenv/config'
+import jimp from 'jimp'
 import md2html from './setup/md2html.js';
 
 const dsclient = new Discord.Client({ intents: 33281, allowedMentions: { repliedUser: false } });
@@ -82,11 +83,35 @@ dsclient.on('messageCreate', async (message) => {
             });
             let msgcontent: string;
             if (message.cleanContent) { msgcontent = md2html(message.cleanContent); } else { msgcontent = ''; }
-            if (message.stickers.size > 0) message.stickers.forEach(s => msgcontent += ' ' + s.url);
+            if (message.stickers.size > 0 && !message.reference)  {
+                const sticker = message.stickers.first();
+                const stickerurl = sticker?.url ?? '';
+
+                const image = await jimp.read(stickerurl)
+
+                const buffer = await image.resize(512, 512).getBufferAsync(jimp.MIME_PNG)
+
+                await tgclient.telegram.sendMessage(telegramChatId, `<b>${message.author.tag}</b>:\n${msgcontent}`, { parse_mode: 'HTML' })
+                const msg = await tgclient.telegram.sendSticker(telegramChatId, { source: buffer })
+                await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id, chatIds: { telegram: telegramChatId, discord: discordChatId } })
+                return;
+            }
             const string = attachmentarray.toString().replaceAll(',', ' ')
             if (message.reference) {
                 const msgid = await global.db.collection('messages').findOne({ discord: message.reference.messageId })
                 if (msgid) {
+                    if (message.stickers.size > 0) {
+
+                        const sticker = message.stickers.first();
+                        const stickerurl = sticker?.url ?? '';
+                        const image = await jimp.read(stickerurl)
+
+                        const buffer = await image.resize(512, 512).getBufferAsync(jimp.MIME_PNG)
+                        await tgclient.telegram.sendMessage(telegramChatId, `<b>${message.author.tag}</b>:\n${msgcontent}`, { reply_to_message_id: parseInt(msgid.telegram) ,parse_mode: 'HTML' })
+                        const msg = await tgclient.telegram.sendSticker(telegramChatId, {source: buffer}, { reply_to_message_id: parseInt(msgid.telegram) })
+                        await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id, chatIds: { telegram: telegramChatId, discord: discordChatId } })
+                        return;
+                    }
                     if (message.flags.toArray().includes("IsVoiceMessage")) {
                         const msg = await tgclient.telegram.sendVoice(telegramChatId, message.attachments.first()?.url ?? '', { reply_to_message_id: parseInt(msgid.telegram), caption: `<b>${message.author.tag}</b>:\n${msgcontent}`, parse_mode: 'HTML' })
                         await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id, chatIds: { telegram: telegramChatId, discord: discordChatId } })
