@@ -1,0 +1,1 @@
+I would like to make a big shoutout to the [TediCross Team](https://github.com/TediCross/TediCross) for some important parts in my bot (such as [this function](https://github.com/AntogamerYT/TeleBridge/blob/master/core/setup/main.js))

@@ -1,9 +1,8 @@
-import Discord, { APIEmbed, ActivityType, Routes, StickerFormatType, TextChannel } from 'discord.js';
+import Discord, { APIEmbed, ActivityType, Routes, TextChannel } from 'discord.js';
 import { default as tgclient } from './telegram.js'
 import 'dotenv/config'
 import jimp from 'jimp'
 import md2html from './setup/md2html.js';
-import { createTextChangeRange } from 'typescript';
 
 const dsclient = new Discord.Client({ intents: 33281, allowedMentions: { repliedUser: false } });
 
@@ -74,7 +73,6 @@ dsclient.on('messageCreate', async (message) => {
     if (process.env.IGNOREBOTS === 'true' && message.author.bot) return;
     if (message.author.id === dsclient.user?.id) return;
 
-
     for (let i = 0; i < global.config.bridges.length; i++) {
         const discordChatId = global.config.bridges[i].discord.chat_id;
         const telegramChatId = global.config.bridges[i].telegram.chat_id;
@@ -85,14 +83,8 @@ dsclient.on('messageCreate', async (message) => {
             });
             let msgcontent: string;
             if (message.cleanContent) { msgcontent = md2html(message.cleanContent); } else { msgcontent = ''; }
-
             if (message.stickers.size > 0 && !message.reference)  {
                 const sticker = message.stickers.first();
-                if (sticker?.format === StickerFormatType.Lottie || sticker?.format === StickerFormatType.APNG) {
-                    const msg = await tgclient.telegram.sendMessage(telegramChatId, `<b>${message.author.tag}</b>:\n<i>Lottie/APNG stickers are currently not supported, sending the message content</i>\n${msgcontent}`, { parse_mode: 'HTML' })
-                    await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id, chatIds: { telegram: telegramChatId, discord: discordChatId } })
-                    return;
-                }
                 const stickerurl = sticker?.url ?? '';
 
                 const image = await jimp.read(stickerurl)
@@ -113,13 +105,6 @@ dsclient.on('messageCreate', async (message) => {
                         const sticker = message.stickers.first();
                         const stickerurl = sticker?.url ?? '';
                         const image = await jimp.read(stickerurl)
-
-                        if (sticker?.format === StickerFormatType.Lottie || sticker?.format === StickerFormatType.APNG) {
-                            const msg = await tgclient.telegram.sendMessage(telegramChatId, `<b>${message.author.tag}</b>:\n<i>Lottie/APNG stickers are currently not supported, sending the message content</i>\n${msgcontent}`, { reply_to_message_id: parseInt(msgid.telegram), parse_mode: 'HTML' })
-                            await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id, chatIds: { telegram: telegramChatId, discord: discordChatId } })
-                            return;
-                        }
-
 
                         const buffer = await image.resize(512, 512).getBufferAsync(jimp.MIME_PNG)
                         await tgclient.telegram.sendMessage(telegramChatId, `<b>${message.author.tag}</b>:\n${msgcontent}`, { reply_to_message_id: parseInt(msgid.telegram) ,parse_mode: 'HTML' })
