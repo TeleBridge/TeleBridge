@@ -35,7 +35,7 @@ export function handleUser(ctx: Context) {
 	if (!ctx.message || !ctx.chat) return undefined;
 	let forwardFromChatTitle: string = "";
 	if (ctx.has(message("forward_from_chat")) && ctx.message.forward_from_chat.type === "private") forwardFromChatTitle = ctx.message.forward_from_chat.first_name;
-	if (ctx.has(message("forward_from_chat")) && ctx.message.forward_from_chat.type === "group") forwardFromChatTitle = ctx.message.forward_from_chat.title;
+	if (ctx.has(message("forward_from_chat")) && ctx.message.forward_from_chat.type === "channel") forwardFromChatTitle = ctx.message.forward_from_chat.title;
 	if (ctx.chat.type === "private") return undefined;
 	switch (ctx.message.from.username) {
 		case undefined:
@@ -45,7 +45,7 @@ export function handleUser(ctx: Context) {
 			username = ctx.message.from.username;
 			break;
 	}
-	if (ctx.has(message("text")) && ctx.message.reply_to_message != undefined) {
+	if (ctx.has(message("text")) && ctx.message.reply_to_message !== undefined) {
 		switch (ctx.message.reply_to_message.from?.username) {
 			case undefined:
 				userreply = ctx.message.reply_to_message.from?.first_name;
@@ -56,8 +56,8 @@ export function handleUser(ctx: Context) {
 		}
 	}
 	if (ctx.has(message("text")) && ctx.message.is_automatic_forward) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.message.forward_sender_name }
-	if (ctx.has(message("forward_from_chat"))) { extraargs = `(Forwarded from ${username})`; username = forwardFromChatTitle }
-	if (ctx.has(message("text")) && ctx.message.forward_from) { extraargs = `(Forwarded by **${ctx.message.forward_from.username}**)`; }
+	if (ctx.has(message("forward_from_chat"))) { extraargs = `(Forwarded by ${username})`; username = forwardFromChatTitle }
+	if (ctx.has(message("text")) && ctx.message.forward_from) { extraargs = `(Forwarded from **${ctx.message.forward_from.username}**)`; }
 	if (userreply) { extraargs = `(Replying to ${userreply})`; }
 	if (extraargs === undefined) extraargs = '';
 	if (userreply === undefined) userreply = '';
