@@ -4,7 +4,7 @@ import { channelPost, editedMessage, message } from "telegraf/filters"
 import { default as dsclient } from './discord.js'
 import { AttachmentBuilder, TextChannel } from 'discord.js'
 import { GenerateBase64Waveform, escapeChars, handleEditedUser, handleUser } from './setup/main.js'
-import { ChatMemberAdministrator } from 'typegram'
+import { ChatMemberAdministrator, Message } from 'typegram'
 
 const tgclient = new Telegraf(process.env.TGTOKEN)
 /*tgclient.telegram.getMe().then((botInfo) => {
@@ -36,7 +36,6 @@ tgclient.command('delete', async (ctx) => {
 })
 tgclient.start((ctx) => ctx.replyWithHTML('Welcome!\nThis is a self-hosted TeleBridge instance, for more info, check out the <a href="https://github.com/AntogamerYT/TeleBridge">GitHub Repo</a>'))
 tgclient.on('text', async (ctx) => {
-  //if (ctx.chat.id != parseInt(telegramChatId)) return;
   for (let i = 0; i < global.config.bridges.length; i++) {
     const discordChatId = global.config.bridges[i].discord.chat_id;
     const telegramChatId = global.config.bridges[i].telegram.chat_id;
@@ -50,8 +49,8 @@ tgclient.on('text', async (ctx) => {
         const msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id })
         if (msgid) {
           const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).messages.fetch(msgid.discord)
-          await msg.reply(`**${escapeChars(username)}** ${extraargs}:\n ${ctx.message.text}`)
-          await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id })
+          const newmsg = await msg.reply(`**${escapeChars(username)}** ${extraargs}:\n ${ctx.message.text}`)
+          await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: newmsg.id })
           return;
         }
       }

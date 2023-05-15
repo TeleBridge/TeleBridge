@@ -3,7 +3,7 @@ import { default as tgclient } from './telegram.js'
 import 'dotenv/config'
 import jimp from 'jimp'
 import md2html from './setup/md2html.js';
-import { createTextChangeRange } from 'typescript';
+import { escapeHTMLSpecialChars } from './setup/main.js';
 
 const dsclient = new Discord.Client({ intents: 33281, allowedMentions: { repliedUser: false } });
 
@@ -84,7 +84,7 @@ dsclient.on('messageCreate', async (message) => {
                 attachmentarray.push(url);
             });
             let msgcontent: string;
-            if (message.cleanContent) { msgcontent = md2html(message.cleanContent); } else { msgcontent = ''; }
+            if (message.cleanContent) { msgcontent = md2html(escapeHTMLSpecialChars(message.cleanContent)); } else { msgcontent = ''; }
 
             if (message.stickers.size > 0 && !message.reference)  {
                 const sticker = message.stickers.first();
@@ -176,7 +176,7 @@ dsclient.on("messageUpdate", async (oM, nM) => {
             attachmentarray.push(url);
         });
         let msgcontent;
-        if (nM.cleanContent) msgcontent = md2html(nM.cleanContent);
+        if (nM.cleanContent) msgcontent = md2html(escapeHTMLSpecialChars(nM.cleanContent));
         if (!msgcontent) msgcontent = '';
         const string = attachmentarray.toString().replaceAll(',', ' ')
         await tgclient.telegram.editMessageText(messageid.chatIds.telegram, parseInt(messageid.telegram), undefined, `<b>${nM.author.tag}</b>:\n${msgcontent} ${string}`, { parse_mode: 'HTML' })
