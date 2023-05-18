@@ -35,7 +35,7 @@ tgclient.command('delete', async (ctx) => {
   ctx.deleteMessage()
 })
 tgclient.start((ctx) => ctx.replyWithHTML('Welcome!\nThis is a self-hosted TeleBridge instance, for more info, check out the <a href="https://github.com/AntogamerYT/TeleBridge">GitHub Repo</a>'))
-tgclient.on('text', async (ctx) => {
+tgclient.on(message("text"), async (ctx) => {
   for (let i = 0; i < global.config.bridges.length; i++) {
     const discordChatId = global.config.bridges[i].discord.chat_id;
     const telegramChatId = global.config.bridges[i].telegram.chat_id;
@@ -120,7 +120,7 @@ tgclient.on(channelPost("text"), async (ctx) => {
   }
 })
 
-tgclient.on('sticker', async (ctx) => {
+tgclient.on(message("sticker"), async (ctx) => {
   for (let i = 0; i < global.config.bridges.length; i++) {
     const discordChatId = global.config.bridges[i].discord.chat_id;
     const telegramChatId = global.config.bridges[i].telegram.chat_id;
@@ -161,7 +161,7 @@ tgclient.on('sticker', async (ctx) => {
   }
 })
 
-tgclient.on('photo', async (ctx) => {
+tgclient.on(message("photo"), async (ctx) => {
   for (let i = 0; i < global.config.bridges.length; i++) {
     const discordChatId = global.config.bridges[i].discord.chat_id;
     const telegramChatId = global.config.bridges[i].telegram.chat_id;
@@ -222,7 +222,7 @@ tgclient.on('photo', async (ctx) => {
     }
   }
 })
-tgclient.on('video', async (ctx) => {
+tgclient.on(message("video"), async (ctx) => {
   for (let i = 0; i < global.config.bridges.length; i++) {
     const discordChatId = global.config.bridges[i].discord.chat_id;
     const telegramChatId = global.config.bridges[i].telegram.chat_id;
@@ -277,7 +277,7 @@ tgclient.on('video', async (ctx) => {
     }
   }
 })
-tgclient.on('voice', async (ctx) => {
+tgclient.on(message("voice"), async (ctx) => {
   for (let i = 0; i < global.config.bridges.length; i++) {
     const discordChatId = global.config.bridges[i].discord.chat_id;
     const telegramChatId = global.config.bridges[i].telegram.chat_id;
@@ -400,7 +400,7 @@ tgclient.on('voice', async (ctx) => {
     }
   }
 })
-tgclient.on('document', async (ctx) => {
+tgclient.on(message("document"), async (ctx) => {
   for (let i = 0; i < global.config.bridges.length; i++) {
     const discordChatId = global.config.bridges[i].discord.chat_id;
     const telegramChatId = global.config.bridges[i].telegram.chat_id;
