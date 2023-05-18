@@ -1,6 +1,8 @@
 # TeleBridge
 A Telegram-Discord bridge with support to multiple bridges!
 
+![TeleBridge Image](https://raw.githubusercontent.com/TeleBridge/.github/13b4764fbf73812d2342dde0063ce85cb69cc0d7/files/GitHub_Preview.png)
+
 Do you want to try the bot before self-hosting it? [Join my Discord server](https://discord.gg/ekaCwEfUt4) and/or [the TeleBridge test group](https://t.me/+FxQGfeA-C2hmYjA8)
 
 ## Requirements
