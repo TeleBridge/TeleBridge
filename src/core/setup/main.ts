@@ -105,6 +105,7 @@ export function handleEditedUser(ctx: any) {
 // Doesn't work with discord, don't even bother trying
 // if you still want to do some fuckery with this code, install https://github.com/bbc/audiowaveform
 // NVM IT'S A LOT EASIER THAN I THOUGHT
+// it isn't because it's not precise but having a waveform is still nice
 export async function GenerateBase64Waveform(audioUrl: string): Promise<string> {
 	const audioData = await (await fetch(audioUrl)).text()
 
