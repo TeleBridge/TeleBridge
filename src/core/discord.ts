@@ -71,7 +71,7 @@ dsclient.on('interactionCreate', async (interaction) => {
 })
 
 dsclient.on('messageCreate', async (message) => {
-    if (process.env.IGNOREBOTS === 'true' && message.author.bot) return;
+    if (global.config.ignore_bots && message.author.bot) return;
     if (message.author.id === dsclient.user?.id) return;
 
 
@@ -154,7 +154,7 @@ dsclient.on('messageCreate', async (message) => {
 dsclient.on('messageDelete', async (message) => {
     if (!message.author) return;
     if (message.author.id === dsclient?.user?.id) return;
-    if (process.env.IGNOREBOTS === 'true' && message.author.bot) return;
+    if (global.config.ignore_bots && message.author.bot) return;
 
     const messageid = await global.db.collection('messages').findOne({ discord: message.id })
 
@@ -166,7 +166,7 @@ dsclient.on('messageDelete', async (message) => {
 
 dsclient.on("messageUpdate", async (oM, nM) => {
     if (!oM.author || !nM.author) return;
-    if (process.env.IGNOREBOTS === 'true' && oM.author.bot) return;
+    if (global.config.ignore_bots && oM.author.bot) return;
     if (oM.author.id === dsclient.user?.id) return;
 
     const messageid = await global.db.collection('messages').findOne({ discord: oM.id })

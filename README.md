@@ -40,6 +40,7 @@ You can edit TeleBridge's settings by editing the [config.json](https://github.c
 | Config Key | Value Type | Description                       |
 |------------|------------|-----------------------------------|
 | Bridges    | Array      | Array of bridges (chats to bridge)|
+| ignore_bots | boolean (true, false) | Choose if you want to hide the bots' messages when bridging a message to Telegram |
 
 
 Bridges (JSON of a bridge):

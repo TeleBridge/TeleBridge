@@ -20,5 +20,6 @@
             },
             "hide": true
         }
-    ]
+    ],
+    "ignore_bots": true
 }
