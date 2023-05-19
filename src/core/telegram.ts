@@ -4,21 +4,16 @@ import { channelPost, editedMessage, message } from "telegraf/filters"
 import { default as dsclient } from './discord.js'
 import { AttachmentBuilder, TextChannel } from 'discord.js'
 import { GenerateBase64Waveform, escapeChars, handleEditedUser, handleUser } from './setup/main.js'
-import { ChatMemberAdministrator, Message } from 'typegram'
+import { ChatMemberAdministrator } from 'typegram'
 
 const tgclient = new Telegraf(process.env.TGTOKEN)
-/*tgclient.telegram.getMe().then((botInfo) => {
-  tgclient.options.username = botInfo.username
-})*/
+
 tgclient.command('chatinfo', async (ctx) => {
   if (ctx.chat.type == 'private') return ctx.reply('This command can only be used in a group chat.')
   ctx.reply(`Chat ID: ${ctx.chat.id}\nChat Type: ${ctx.chat.type}\nChat Title: ${ctx.chat.title}`)
 })
 
 tgclient.command('delete', async (ctx) => {
-  //if (ctx.chat.id != parseInt(telegramChatId)) return;
-
-
   const chatMember = await ctx.getChatMember(ctx.from.id) as ChatMemberAdministrator
   if ((chatMember as any).status !== "creator" && !chatMember.can_delete_messages) return ctx.reply('You need to be an admin and have the permission to delete messages to use this command.')
   if (!ctx.message.reply_to_message) return ctx.reply('Please reply to a message to delete it.')
@@ -26,15 +21,35 @@ tgclient.command('delete', async (ctx) => {
   const messageid = await global.db.collection("messages").findOne({ telegram: message })
   if (messageid != undefined) {
     tgclient.telegram.deleteMessage(messageid.chatIds.telegram, message)
-    const msg = await (await dsclient.channels.cache.get(messageid.chatIds.discord) as TextChannel).messages.fetch(messageid.discord)
+    const msg = await (dsclient.channels.cache.get(messageid.chatIds.discord) as TextChannel).messages.fetch(messageid.discord)
     msg.delete()
     await global.db.collection('messages').deleteOne({ telegram: message })
   } else {
-    ctx.reply('Message not found, maybe the bot was restarted?')
+    ctx.reply('Message not found.')
   }
   ctx.deleteMessage()
 })
-tgclient.start((ctx) => ctx.replyWithHTML('Welcome!\nThis is a self-hosted TeleBridge instance, for more info, check out the <a href="https://github.com/AntogamerYT/TeleBridge">GitHub Repo</a>'))
+
+tgclient.command('bridges', async (ctx) => {
+  let bridges = ''
+  for (let i = 0; i < global.config.bridges.length; i++) {
+    const bridge = global.config.bridges[i];
+    if (bridge.hide && ctx.chat.id !== parseInt(bridge.telegram.chat_id)) continue;
+    const discordChannel = dsclient.channels.cache.get(bridge.discord.chat_id);
+    const telegramChannel = await tgclient.telegram.getChat(bridge.telegram.chat_id);
+    if (telegramChannel.type === "private") return; // Typescript moment
+    bridges += `
+            <b>${bridge.name}</b>:
+                <b>${(discordChannel as TextChannel).name}</b> (${discordChannel?.id}) - <b>${telegramChannel.title}</b> (${telegramChannel.id})\n`
+  }
+  ctx.replyWithHTML(`<b>Bridges:</b>\n${bridges}\n\nPowered by <a href="https://github.com/TeleBridge/TeleBridge.git">TeleBridge</a>`)
+})
+
+tgclient.command("info", async (ctx) => {
+  ctx.replyWithHTML("TeleBridge is a bridge between Telegram and Discord made by <a href=\"https://antogamer.it\">Antogamer</a>\n\nIt doesn\'t have a public instance, so you\'ll have to selfhost it, but don\'t worry! It\'s easy!\n\nCheck me out on <a href=\"https://github.com/TeleBridge/TeleBridge.git\">GitHub</a>")
+})
+
+tgclient.start((ctx) => ctx.replyWithHTML('Welcome!\nThis is a self-hosted TeleBridge instance, for more info, check out the <a href="https://github.com/TeleBridge/TeleBridge">GitHub Repo</a>\nFor a list of bridges, run the /bridges command\nFor more infos, check the /info command.'))
 tgclient.on(message("text"), async (ctx) => {
   for (let i = 0; i < global.config.bridges.length; i++) {
     const discordChatId = global.config.bridges[i].discord.chat_id;

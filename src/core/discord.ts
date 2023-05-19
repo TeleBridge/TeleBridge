@@ -37,13 +37,13 @@ dsclient.on('interactionCreate', async (interaction) => {
             if (telegramChannel.type === "private") return; // Typescript moment
             embedString += `
             **${bridgeName}**:
-                **${(discordChannel as TextChannel).name}** (${discordChatId}) - **${telegramChannel.title}** ${telegramChatId}\n
+                **${(discordChannel as TextChannel).name}** (${discordChatId}) - **${telegramChannel.title}** (${telegramChatId})\n
             `
         }
 
         const embed: APIEmbed = {
             title: 'Bridges',
-            description: embedString + '\n\nPowered by [TeleBridge](https://github.com/AntogamerYT/TeleBridge.git)',
+            description: embedString + '\n\nPowered by [TeleBridge](https://github.com/TeleBridge/TeleBridge.git)',
             color: 0x00ff00,
             timestamp: new Date().toISOString(),
             footer: {
@@ -58,7 +58,7 @@ dsclient.on('interactionCreate', async (interaction) => {
 
         const embed: APIEmbed = {
             title: 'Info',
-            description: 'TeleBridge is a bridge between Telegram and Discord made by [Antogamer](https://antogamer.it)\n\nIt doesn\'t have a public instance, so you\'ll have to selfhost it, but don\'t worry! It\'s easy!\n\nCheck me out on [GitHub](https://github.com/AntogamerYT/TeleBridge.git)',
+            description: 'TeleBridge is a bridge between Telegram and Discord made by [Antogamer](https://antogamer.it)\n\nIt doesn\'t have a public instance, so you\'ll have to selfhost it, but don\'t worry! It\'s easy!\n\nCheck me out on [GitHub](https://github.com/TeleBridge/TeleBridge.git)',
             color: 0x00ff00,
             timestamp: new Date().toISOString(),
             footer: {
