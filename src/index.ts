@@ -1,4 +1,4 @@
-import { clearOldMessages } from './core/setup/main.js';
+import { clearOldMessages, validateChannels } from './core/setup/main.js';
 import { config as DotEnvConfig } from "dotenv";
 import { Db, MongoClient } from 'mongodb'
 import chalk from 'chalk'
@@ -20,13 +20,8 @@ if (GHpackageJson.version !== packageJson.version) {
 }
 
 
-process.on('uncaughtException', (err) => {
-    console.log(err);
-})
+
 const client = new MongoClient(process.env.MONGO_URI);
-await clearOldMessages(telegram)
-telegram.launch()
-discord.login(process.env.DISCORDTOKEN)
 await client.connect();
 const ConfigFile = fs.readFileSync(`${process.cwd()}/config.json`, 'utf-8');
 if (!ConfigFile && !JSON.parse(ConfigFile)) throw new Error('Config file not found')
@@ -42,8 +37,15 @@ if (JSON.stringify(Object.keys(GHConfigJson)).length > JSON.stringify(Object.key
     })
     fs.writeFileSync(`${process.cwd()}/config.json`, JSON.stringify(global.config, null, 4))
 }
-
 global.db = client.db()
+
+await clearOldMessages(telegram)
+telegram.launch()
+discord.login(process.env.DISCORDTOKEN)
+
+process.on('uncaughtException', (err) => {
+    console.log(err);
+})
 
 /**
  * example db object for reference
@@ -56,8 +58,6 @@ global.db = client.db()
  *   }
  * }
  */
-
-if (!process.env.IGNOREBOTS) process.env.IGNOREBOTS = 'true';
 
 declare global {
     var db: Db;

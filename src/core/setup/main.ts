@@ -1,6 +1,8 @@
 import { Context, Telegraf } from 'telegraf';
 import { Update } from 'typegram';
 import { message } from 'telegraf/filters';
+import dsclient from '../discord.js';
+import tgclient from '../telegram.js';
 
 
 export function clearOldMessages(tgBot: Telegraf, offset = -1): any {
@@ -110,4 +112,19 @@ export async function GenerateBase64Waveform(audioUrl: string): Promise<string> 
 	const audioData = await (await fetch(audioUrl)).text()
 
 	return Buffer.from(audioData.slice(0, 100)).toString('base64')
+}
+
+export async function validateChannels() {
+	for (let bridge of global.config.bridges) {
+		const dschannel = dsclient.channels.cache.get(bridge.discord.chat_id)
+		if (!dschannel) throw new Error("Invalid Discord channel at bridge \"" + bridge.name + "\"")
+		try {
+			const tgchat = await tgclient.telegram.getChat(bridge.telegram.chat_id)
+			if(!tgchat) throw new Error("Invalid Telegram chat at bridge \"" + bridge.name + "\"")
+		} catch (error) {
+			throw new Error(`${error}`)
+		}
+
+	}
+	
 }

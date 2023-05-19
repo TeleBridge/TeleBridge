@@ -1,14 +1,23 @@
-import Discord, { APIEmbed, ActivityType, Routes, StickerFormatType, TextChannel } from 'discord.js';
+import { APIEmbed, ActivityType, Routes, StickerFormatType, TextChannel, GatewayIntentBits, Client, Partials } from 'discord.js';
 import { default as tgclient } from './telegram.js'
 import 'dotenv/config'
 import jimp from 'jimp'
 import md2html from './setup/md2html.js';
-import { escapeHTMLSpecialChars } from './setup/main.js';
+import { escapeHTMLSpecialChars, validateChannels } from './setup/main.js';
 
-const dsclient = new Discord.Client({ intents: 33281, allowedMentions: { repliedUser: false } });
+const dsclient = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
+    ],
+    allowedMentions: { repliedUser: false },
+    partials: [ Partials.Channel ]
+});
 
-dsclient.on('ready', () => {
+dsclient.on('ready', async () => {
     console.log(`Logged in as ${dsclient.user?.tag}`);
+    await validateChannels()
 
     dsclient.user?.setActivity({
         name: 'Messages from Telegram and Discord with TeleBridge! | /info',
