@@ -66,11 +66,7 @@ declare global {
         interface ProcessEnv {
             DISCORDTOKEN: string;
             TGTOKEN: string;
-            TGCHATID: string;
-            TGUSERNAME: string;
-            DISCORDCHANNELID: string;
             MONGO_URI: string;
-            IGNOREBOTS: string;
         }
     }
 }
