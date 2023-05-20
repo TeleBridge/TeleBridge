@@ -16,13 +16,17 @@ Do you need some help to run the bot? [Join my Discord server](https://discord.g
 ## How to host
 ### You should install [NodeJS](https://nodejs.org/en/) to continue
 - Clone the repo using git or any version control program
-- Create a [Discord bot](https://discord.com/developers/applications) with the Message Content intent enabled and a Telegram bot by messaging [@BotFather](https://t.me/BotFather), **MAKE SURE TO DISABLE PRIVACY MODE** by following this video 
+- Create a [Discord bot](https://discord.com/developers/applications) with the Message Content intent enabled and a Telegram bot by messaging [@BotFather](https://t.me/BotFather), **MAKE SURE TO DISABLE PRIVACY MODE** by following this example
 
-![](https://cdn.antogamer.it/r/Telegram_LcLzXfxwXO.gif)
+
+![GIF that uses the /setprivacy command of Telegram's BotFather bot to disable the privacy on the bot](https://github.com/TeleBridge/TeleBridge/assets/64664639/525149bc-6dab-4cb7-a80a-2c7d6ac9c3a8)
+
 
 - Message content **HAS** to be enabled on your bot or else it will crash, go into the Discord developer dashboard, open your application, go to bot, flip the message content intent switch on and press save on the bottom of the page
-![](https://cdn.antogamer.it/r/msedge_02pF29B5Bz.png)
 
+![Message Content switch in the Discord Developers dashboard](https://cdn.antogamer.it/r/msedge_02pF29B5Bz.png)
+
+- Get the Telegram chat id by running the /chatinfo command of the bot and the Discord channel id by enabling developer mode on Discord, right clicking on the channel and clicking "Copy Channel ID"
 - Fill out the [.env.example](https://github.com/AntogamerYT/TeleBridge/blob/master/.env.example) and rename it into `.env`
 - Also fill the [example.config.json](https://github.com/AntogamerYT/TeleBridge/blob/master/example.config.json) and rename it into `config.json`
 
@@ -49,8 +53,8 @@ Bridges (JSON of a bridge):
 |--------------|------------|---------------------------------------------------|
 | name         | string     | Name of the bridge, useful for the /bridges command|
 | discord chat_id | string  | Channel ID of Discord, get it by enabling developer mode on Discord, right clicking on the channel and clicking "Copy Channel ID"|
-| telegram chat_id | string | Chat ID of the Telegram group chat, get it by using the /info command of TeleBridge |
-| hide | boolean (true, false) | Decides if the bridge should be hidden in the /bridges command if the command is ran on a Discord server that's not the hidden one |
+| telegram chat_id | string | Chat ID of the Telegram group chat, get it by using the /chatinfo command of TeleBridge |
+| hide | boolean (true, false) | Decides if the bridge should be hidden in the /bridges command if the command is ran on a Discord server/Telegram chat that's not the hidden one |
 
 ## How do I support the project?
 
