@@ -3,6 +3,7 @@ import { Update } from 'typegram';
 import { message } from 'telegraf/filters';
 import dsclient from '../discord.js';
 import tgclient from '../telegram.js';
+import chalk from 'chalk';
 
 
 export function clearOldMessages(tgBot: Telegraf, offset = -1): any {
@@ -117,11 +118,18 @@ export async function GenerateBase64Waveform(audioUrl: string): Promise<string> 
 export async function validateChannels() {
 	for (let bridge of global.config.bridges) {
 		const dschannel = dsclient.channels.cache.get(bridge.discord.chat_id)
-		if (!dschannel) throw new Error("Invalid Discord channel at bridge \"" + bridge.name + "\"")
+		if (!dschannel) {
+			console.log(chalk.yellow("Invalid Discord channel at bridge \"" + bridge.name + "\", disabling the bridge (the messages of that bridge won't be forwarded)"))
+			bridge.disabled = true;
+			return;
+		}
 		try {
 			const tgchat = await tgclient.telegram.getChat(bridge.telegram.chat_id)
-			if(!tgchat) throw new Error("Invalid Telegram chat at bridge \"" + bridge.name + "\"")
-		} catch (error) {
+			if (!tgchat) {
+				console.log(chalk.yellow("Invalid Telegram chat at bridge \"" + bridge.name + "\", disabling the bridge (the messages of that bridge won't be forwarded)"))
+				bridge.disabled = true;
+			}
+			} catch (error) {
 			throw new Error(`${error}`)
 		}
 

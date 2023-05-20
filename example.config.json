@@ -8,7 +8,8 @@
             "telegram": {
                 "chat_id": "-1001234567890"
             },
-            "hide": false 
+            "hide": false,
+            "disabled": false
         },
         {
             "name": "CIA Top Secret Bridge",
@@ -18,7 +19,8 @@
             "telegram": {
                 "chat_id": "-1001234567890"
             },
-            "hide": true
+            "hide": true,
+            "disabled": false
         }
     ],
     "ignore_bots": true

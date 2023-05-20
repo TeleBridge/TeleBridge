@@ -81,6 +81,7 @@ interface Config {
             chat_id: string;
         },
         hide: boolean;
+        disabled: boolean;
     }[]
     ignore_bots: boolean;
     [key: string]: any;

@@ -46,7 +46,7 @@ tgclient.command('bridges', async (ctx) => {
       const telegramChannel = await tgclient.telegram.getChat(bridge.telegram.chat_id);
       if (telegramChannel.type === "private") return; // Typescript moment
       bridges += `
-            <b>${bridge.name}</b>:
+            <b>${bridge.name}${bridge.disabled ? " (disabled)" : ""}</b>:
                 <b>${(discordChannel as TextChannel).name}</b> (${discordChannel?.id}) - <b>${telegramChannel.title}</b> (${telegramChannel.id})\n`
     }
     ctx.replyWithHTML(`<b>Bridges:</b>\n${bridges}\n\nPowered by <a href="https://github.com/TeleBridge/TeleBridge.git">TeleBridge</a>`)
@@ -64,6 +64,7 @@ tgclient.start((ctx) => ctx.replyWithHTML('Welcome!\nThis is a self-hosted TeleB
 tgclient.on(message("text"), async (ctx) => {
   try {
     for (let i = 0; i < global.config.bridges.length; i++) {
+      if (global.config.bridges[i].disabled) continue;
       const discordChatId = global.config.bridges[i].discord.chat_id;
       const telegramChatId = global.config.bridges[i].telegram.chat_id;
       if (parseInt(telegramChatId) === ctx.chat.id) {
@@ -96,6 +97,7 @@ tgclient.on(editedMessage("text"), async (ctx) => {
   try {
     if (!ctx.editedMessage) return;
     for (let i = 0; i < global.config.bridges.length; i++) {
+      if(global.config.bridges[i].disabled) continue;
       const discordChatId = global.config.bridges[i].discord.chat_id;
       const telegramChatId = global.config.bridges[i].telegram.chat_id;
       if (parseInt(telegramChatId) === ctx.chat.id) {
@@ -123,6 +125,7 @@ tgclient.on(editedMessage("text"), async (ctx) => {
 tgclient.on(channelPost("text"), async (ctx) => {
   try {
     for (let i = 0; i < global.config.bridges.length; i++) {
+      if (global.config.bridges[i].disabled) continue;
       const discordChatId = global.config.bridges[i].discord.chat_id;
       const telegramChatId = global.config.bridges[i].telegram.chat_id;
       if (parseInt(telegramChatId) === ctx.chat.id) {
@@ -163,6 +166,7 @@ tgclient.on(channelPost("text"), async (ctx) => {
 tgclient.on(message("sticker"), async (ctx) => {
   try {
     for (let i = 0; i < global.config.bridges.length; i++) {
+      if (global.config.bridges[i].disabled) continue;
       const discordChatId = global.config.bridges[i].discord.chat_id;
       const telegramChatId = global.config.bridges[i].telegram.chat_id;
       if (parseInt(telegramChatId) === ctx.chat.id) {
@@ -208,6 +212,7 @@ tgclient.on(message("sticker"), async (ctx) => {
 tgclient.on(message("photo"), async (ctx) => {
   try {
     for (let i = 0; i < global.config.bridges.length; i++) {
+      if (global.config.bridges[i].disabled) continue;
       const discordChatId = global.config.bridges[i].discord.chat_id;
       const telegramChatId = global.config.bridges[i].telegram.chat_id;
       if (parseInt(telegramChatId) === ctx.chat.id) {
@@ -274,6 +279,7 @@ tgclient.on(message("photo"), async (ctx) => {
 tgclient.on(message("video"), async (ctx) => {
   try {
     for (let i = 0; i < global.config.bridges.length; i++) {
+      if (global.config.bridges[i].disabled) continue;
       const discordChatId = global.config.bridges[i].discord.chat_id;
       const telegramChatId = global.config.bridges[i].telegram.chat_id;
       if (parseInt(telegramChatId) === ctx.chat.id) {
@@ -333,6 +339,7 @@ tgclient.on(message("video"), async (ctx) => {
 tgclient.on(message("voice"), async (ctx) => {
   try {
     for (let i = 0; i < global.config.bridges.length; i++) {
+      if (global.config.bridges[i].disabled) continue;
       const discordChatId = global.config.bridges[i].discord.chat_id;
       const telegramChatId = global.config.bridges[i].telegram.chat_id;
       if (parseInt(telegramChatId) === ctx.chat.id) {
@@ -460,6 +467,7 @@ tgclient.on(message("voice"), async (ctx) => {
 tgclient.on(message("document"), async (ctx) => {
   try {
     for (let i = 0; i < global.config.bridges.length; i++) {
+      if (global.config.bridges[i].disabled) continue;
       const discordChatId = global.config.bridges[i].discord.chat_id;
       const telegramChatId = global.config.bridges[i].telegram.chat_id;
       if (parseInt(telegramChatId) === ctx.chat.id) {
