@@ -162,8 +162,8 @@ dsclient.on('messageCreate', async (message) => {
 
 dsclient.on('messageDelete', async (message) => {
     if (!message.author) return;
-    if (message.author.id === dsclient?.user?.id) return;
-    if (global.config.ignore_bots && message.author.bot) return;
+    //if (message.author.id === dsclient?.user?.id) return;
+    if (global.config.ignore_bots && message.author.bot && message.author.id !== dsclient?.user?.id) return;
 
     const messageid = await global.db.collection('messages').findOne({ discord: message.id })
 
