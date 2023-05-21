@@ -97,7 +97,7 @@ tgclient.on(editedMessage("text"), async (ctx) => {
   try {
     if (!ctx.editedMessage) return;
     for (let i = 0; i < global.config.bridges.length; i++) {
-      if(global.config.bridges[i].disabled) continue;
+      if (global.config.bridges[i].disabled) continue;
       const discordChatId = global.config.bridges[i].discord.chat_id;
       const telegramChatId = global.config.bridges[i].telegram.chat_id;
       if (parseInt(telegramChatId) === ctx.chat.id) {
@@ -402,10 +402,11 @@ tgclient.on(message("voice"), async (ctx) => {
                   waveform: waveform
                 }],
                 message_reference: {
-                  message_id: msg.id,
+                  message_id: msgid.discord,
                   channel_id: msg.channel.id,
                   guild_id: msg.guild.id
                 },
+                allowed_mentions: { repliedUser: false },
                 flags: 8192
               }),
               headers: {
