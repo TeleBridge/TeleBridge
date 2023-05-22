@@ -1,9 +1,10 @@
-import { APIEmbed, ActivityType, Routes, StickerFormatType, TextChannel, GatewayIntentBits, Client, Partials } from 'discord.js';
+import { APIEmbed, ActivityType, Routes, StickerFormatType, TextChannel, GatewayIntentBits, Client, Partials, APIApplicationCommand, Collection, ChatInputCommandInteraction, CacheType, Interaction, ApplicationCommandOption, ApplicationCommandType } from 'discord.js';
 import { default as tgclient } from './telegram.js'
 import 'dotenv/config'
 import jimp from 'jimp'
 import md2html from './setup/md2html.js';
 import { escapeHTMLSpecialChars, validateChannels } from './setup/main.js';
+import fs from 'fs'
 
 const dsclient = new Client({
     intents: [
@@ -15,7 +16,23 @@ const dsclient = new Client({
     partials: [ Partials.Channel ]
 });
 
+dsclient.commands = new Collection()
+
+
 dsclient.on('ready', async () => {
+    const commandFiles = fs.readdirSync(`${process.cwd()}/dist/core/commands/discord`).filter(file => file.endsWith('.js'));
+
+    let commandsArray: any[] = [];
+    for (const file of commandFiles) {
+        const command: Command = await import(`${process.cwd()}/dist/core/commands/discord/${file}`);
+        commandsArray.push({
+            name: command.name,
+            description: command.description,
+            options: command.options || [],
+            dm_permission: command.dm_permission || true
+        })
+        dsclient.commands.set(command.name, command);
+    }
     console.log(`Logged in as ${dsclient.user?.tag}`);
     await validateChannels()
 
@@ -26,56 +43,24 @@ dsclient.on('ready', async () => {
 
     dsclient.rest.put(
         Routes.applicationCommands(dsclient?.user?.id!),
-        { body: [{ name: 'bridges', description: 'List of bridges' }, { name: "info", description: "Infos about me" }] }
+        {
+            body: commandsArray
+        }
     )
 })
 
 dsclient.on('interactionCreate', async (interaction) => {
-    let embedString: string = '';
+
     if (!interaction.isCommand()) return;
-    if (interaction.commandName === 'bridges') {
-        await interaction.deferReply({ ephemeral: true });
 
-        for (let i = 0; i < global.config.bridges.length; i++) {
-            const discordChatId = global.config.bridges[i].discord.chat_id;
-            const telegramChatId = global.config.bridges[i].telegram.chat_id;
-            if (global.config.bridges[i].hide && (dsclient.channels.cache.get(global.config.bridges[i].discord.chat_id) as TextChannel).guildId !== interaction.guildId) continue;
-            const bridgeName = global.config.bridges[i].name;
-            const discordChannel = await dsclient.channels.fetch(discordChatId);
-            const telegramChannel = await tgclient.telegram.getChat(telegramChatId);
-            if (telegramChannel.type === "private") return; // Typescript moment
-            embedString += `
-            **${bridgeName}**:
-                **${(discordChannel as TextChannel).name}** (${discordChatId}) - **${telegramChannel.title}** (${telegramChatId})\n
-            `
-        }
+    const command = dsclient.commands.get(interaction.commandName);
 
-        const embed: APIEmbed = {
-            title: 'Bridges',
-            description: embedString + '\n\nPowered by [TeleBridge](https://github.com/TeleBridge/TeleBridge.git)',
-            color: 0x00ff00,
-            timestamp: new Date().toISOString(),
-            footer: {
-                text: 'TeleBridge',
-            }
-        }
+    if (!command) return;
 
-        await interaction.editReply({ embeds: [embed] })
-    }
-
-    if (interaction.commandName === 'info') {
-
-        const embed: APIEmbed = {
-            title: 'Info',
-            description: 'TeleBridge is a bridge between Telegram and Discord made by [Antogamer](https://antogamer.it)\n\nIt doesn\'t have a public instance, so you\'ll have to selfhost it, but don\'t worry! It\'s easy!\n\nCheck me out on [GitHub](https://github.com/TeleBridge/TeleBridge.git)',
-            color: 0x00ff00,
-            timestamp: new Date().toISOString(),
-            footer: {
-                text: 'TeleBridge',
-            }
-        }
-
-        await interaction.reply({ embeds: [embed], ephemeral: true })
+    try {
+        await command.execute(dsclient, interaction);
+    } catch (error) {
+        
     }
 })
 
@@ -162,7 +147,6 @@ dsclient.on('messageCreate', async (message) => {
 
 dsclient.on('messageDelete', async (message) => {
     if (!message.author) return;
-    //if (message.author.id === dsclient?.user?.id) return;
     if (global.config.ignore_bots && message.author.bot && message.author.id !== dsclient?.user?.id) return;
 
     const messageid = await global.db.collection('messages').findOne({ discord: message.id })
@@ -193,3 +177,17 @@ dsclient.on("messageUpdate", async (oM, nM) => {
 })
 
 export default dsclient;
+
+declare module 'discord.js' {
+    interface Client {
+        commands: Collection<string, Command>;
+    }
+}
+
+interface Command {
+    name: string;
+    description: string;
+    dm_permission: boolean;
+    options: ApplicationCommandOption[];
+    execute: (client: Client, interaction: Interaction) => void | Promise<void>;
+}

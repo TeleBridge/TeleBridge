@@ -14,6 +14,84 @@ tgclient.command('chatinfo', async (ctx) => {
   ctx.reply(`Chat ID: ${ctx.chat.id}\nChat Type: ${ctx.chat.type}\nChat Title: ${ctx.chat.title}`)
 })
 
+
+
+tgclient.command("link", async (ctx) => {
+  if (await global.db.collection("Users").findOne({ telegram_id: ctx.from?.id })) return ctx.reply("Your account is already linked.")
+  const args = ctx.message.text.split(" ")
+  const code = args[1]
+  if (!code) return ctx.reply("Please provide a code, to get it run the /link command on the TeleBridge bot on Discord.")
+  let dbval = await global.db.collection("Users").findOne({ code: parseInt(code) })
+  if (!dbval) return ctx.reply("The code is invalid, make sure to run /link in Discord first to get your code.")
+  if (dbval.telegram_id) return ctx.reply("Your account is already linked, use the /unlink command to unlink it first.")
+
+  const keyboard = {
+    inline_keyboard: [
+      [
+        {
+          text: "Confirm",
+          callback_data: `link:${code}`
+        }
+      ],
+      [
+        {
+          text: "Cancel",
+          callback_data: "cancel"
+        }
+      ]
+    ]
+  }
+
+  const dsuser = await dsclient.users.fetch(dbval.discord_id) 
+
+  ctx.reply(`Are you sure you want to link this account to the following Discord account?\n\nUsername: ${dsuser.tag}\nID: ${dsuser.id}`, { reply_markup: keyboard })
+  tgclient.action(`link:${code}`, async (ctx) => {
+    await global.db.collection("Users").updateOne({ code: parseInt(code) }, { $set: { telegram_id: ctx.from?.id }, $unset: { code: "" } })
+    await ctx.editMessageReplyMarkup({ inline_keyboard: [] })
+    await ctx.editMessageText("Account linked successfully.")
+
+  })
+})
+
+tgclient.command("unlink", async (ctx) => {
+  let dbval = await global.db.collection("Users").findOne({ telegram_id: ctx.from?.id })
+  if (!dbval) return ctx.reply("Your account is not linked.")
+  const keyboard = {
+    inline_keyboard: [
+      [
+        {
+
+          text: "Confirm",
+          callback_data: `unlink:${ctx.from?.id}`
+        }
+      ],
+      [
+        {
+          text: "Cancel",
+          callback_data: "cancel"
+        }
+      ]
+    ]
+  }
+
+  const dsuser = await dsclient.users.fetch(dbval.discord_id)
+
+  ctx.reply(`Are you sure you want to unlink this account from the following Discord account?\n\nUsername: ${dsuser.tag}\nID: ${dsuser.id}`, { reply_markup: keyboard })
+
+  tgclient.action(`unlink:${ctx.from?.id}`, async (ctx) => {
+    await global.db.collection("Users").deleteOne({ telegram_id: ctx.from?.id })
+    await ctx.editMessageReplyMarkup({ inline_keyboard: [] })
+    await ctx.editMessageText("Account unlinked successfully.")
+  })
+
+
+})
+
+tgclient.action("cancel", async (ctx) => {
+  await ctx.editMessageReplyMarkup({ inline_keyboard: [] })
+  await ctx.editMessageText("Cancelled.")
+})
+
 tgclient.command('delete', async (ctx) => {
   try {
     const chatMember = await ctx.getChatMember(ctx.from.id) as ChatMemberAdministrator
