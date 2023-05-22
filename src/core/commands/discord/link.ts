@@ -5,13 +5,28 @@ export const name = "link";
 export const description = "Link your Discord account to your Telegram account";
 export const dm_permission = false;
 export async function execute(client: Client, interaction: ChatInputCommandInteraction) {
-
-    if (await global.db.collection("Users").findOne({ discord_id: interaction.user.id })) {
+    await interaction.deferReply({ ephemeral: true });
+    let dbval;
+    dbval = await global.db.collection("Users").findOne({ discord_id: interaction.user.id })
+    if (dbval && !dbval.code) {
         await interaction.reply({ content: "You already have a linked account.", ephemeral: true });
         return;
     }
+
+    if (dbval && dbval.code) {
+        const embed: APIEmbed = {
+            title: 'Account linking',
+            description: `To link your account, send the code \`${dbval.code}\` to the [Telegram bot](https://t.me/${tgclient.botInfo?.username}) in a private chat using the /link command like this:\n\n\`/link ${dbval.code}\``,
+            color: 0x00ff00,
+            timestamp: new Date().toISOString(),
+            footer: {
+                text: 'TeleBridge',
+            }
+        }
+
+        await interaction.editReply({ embeds: [embed] })
+    }
     
-    await interaction.deferReply({ ephemeral: true });
     let int = 0;
     for (let bridge of global.config.bridges) {
         const guildId = (client.channels.cache.get(bridge.discord.chat_id) as GuildChannel).guildId;
@@ -28,7 +43,7 @@ export async function execute(client: Client, interaction: ChatInputCommandInter
 
     code = Math.floor(10000 + Math.random() * 90000);
 
-    let dbval = await global.db.collection("Users").findOne({ code: code })
+    dbval = await global.db.collection("Users").findOne({ code: code })
 
     while (dbval) {
         code = Math.floor(10000 + Math.random() * 90000);
