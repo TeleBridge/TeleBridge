@@ -29,7 +29,7 @@ Do you need some help to run the bot? [Join my Discord server](https://discord.g
 - Get the Telegram chat id by running the /chatinfo command of the bot and the Discord channel id by enabling developer mode on Discord, right clicking on the channel and clicking "Copy Channel ID"
 - Fill out the [.env.example](https://github.com/AntogamerYT/TeleBridge/blob/master/.env.example) and rename it into `.env`
 
-    Don't know how to get API_ID and API_HASH? Check [Getting API ID and hash](https://github.com/TeleBridge/TeleBridge/blob/master/README.md#getting-api-id-and-hash)
+    Don't know how to get API_ID and API_HASH? Check [Getting API ID and hash](https://github.com/TeleBridge/TeleBridge/tree/master#getting-api-id-and-hash)
 - Also fill the [example.config.json](https://github.com/AntogamerYT/TeleBridge/blob/master/example.config.json) and rename it into `config.json`
 
     PRO Tip: You can add more bridges by simply adding more objects in `bridges`
