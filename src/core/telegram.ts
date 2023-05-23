@@ -1,20 +1,41 @@
 import 'dotenv/config'
 import { Telegraf } from 'telegraf'
-import { channelPost, editedMessage, message } from "telegraf/filters"
+import { channelPost, editedChannelPost, editedMessage, message } from "telegraf/filters"
 import { default as dsclient } from './discord.js'
 import { AttachmentBuilder, TextChannel } from 'discord.js'
 import { GenerateBase64Waveform, escapeChars, handleEditedUser, handleUser } from './setup/main.js'
 import { ChatMemberAdministrator } from 'typegram'
+// mtproto here we comeeeeeee
+import { TelegramClient } from 'telegram'
+import { clean } from './commands/discord/eval.js'
+import { inspect } from 'util'
 
 const tgclient = new Telegraf(process.env.TGTOKEN)
 
-
 tgclient.command('chatinfo', async (ctx) => {
-  if (ctx.chat.type == 'private') return ctx.reply('This command can only be used in a group chat.')
+  if (ctx.chat.type === 'private') return ctx.reply('This command can only be used in a group chat.')
   ctx.reply(`Chat ID: ${ctx.chat.id}\nChat Type: ${ctx.chat.type}\nChat Title: ${ctx.chat.title}`)
 })
 
+tgclient.command("eval", async (ctx) => { 
+  if (parseInt(global.config.owner.telegram) !== ctx.from.id)
+    return;
+  const args = ctx.message.text.split(" ").slice(1)
 
+  const toEval = `(async  () => {${clean(args.join(' '))}})()`;
+  try {
+    if (toEval) {
+      const evaluated = inspect(await eval(toEval));
+
+      
+      return ctx.reply(`<code>\n${evaluated}\n</code>`, { parse_mode: "HTML" });
+    }
+  } catch (e) {
+    return ctx.reply(`Error\n<code>js\n${e}\n</code>`, { parse_mode: "HTML"});
+  }
+
+    
+})
 
 tgclient.command("link", async (ctx) => {
   if (await global.db.collection("Users").findOne({ telegram_id: ctx.from?.id })) return ctx.reply("Your account is already linked.")
@@ -199,6 +220,35 @@ tgclient.on(editedMessage("text"), async (ctx) => {
 
 })
 
+tgclient.on(editedMessage("caption"), async (ctx) => {
+
+  try {
+    if (!ctx.editedMessage) return;
+    for (let i = 0; i < global.config.bridges.length; i++) {
+      if (global.config.bridges[i].disabled) continue;
+      const discordChatId = global.config.bridges[i].discord.chat_id;
+      const telegramChatId = global.config.bridges[i].telegram.chat_id;
+      if (parseInt(telegramChatId) === ctx.chat.id) {
+        let user = handleEditedUser(ctx)
+        if (!user) return;
+        let username = user.username
+        let extraargs = user.extraargs
+        let userreply = user.userreply
+
+        const messageid = await global.db.collection("messages").findOne({ telegram: ctx.editedMessage.message_id })
+
+        if (messageid) {
+          const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).messages.fetch(messageid.discord)
+          await msg.edit({ content: `**${escapeChars(username)}** ${extraargs}:\n ${ctx.editedMessage.caption}` })
+        }
+      }
+    }
+  } catch (error) {
+    console.log(error)
+  }
+
+})
+
 
 tgclient.on(channelPost("text"), async (ctx) => {
   try {
@@ -238,6 +288,28 @@ tgclient.on(channelPost("text"), async (ctx) => {
   } catch (error) {
     console.log(error)
   }
+
+})
+
+tgclient.on(editedChannelPost("text"), async (ctx) => { 
+  try {
+    if (!ctx.editedChannelPost) return;
+    for (let i = 0; i < global.config.bridges.length; i++) {
+      if (global.config.bridges[i].disabled) continue;
+      const discordChatId = global.config.bridges[i].discord.chat_id;
+      const telegramChatId = global.config.bridges[i].telegram.chat_id;
+      if (parseInt(telegramChatId) === ctx.chat.id) {
+        const messageid = await global.db.collection("messages").findOne({ telegram: ctx.editedChannelPost.message_id })
+        if (messageid) {
+          const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).messages.fetch(messageid.discord)
+          await msg.edit(`**${escapeChars(ctx.update.edited_channel_post.chat.title)}**:\n ${ctx.editedChannelPost.text}`)
+        }
+      }
+    }
+  } catch (error) {
+    console.log(error)
+  }
+
 
 })
 
@@ -654,4 +726,12 @@ tgclient.on(message("location"), async (ctx) => {
 
 })
 
+
+
 export default tgclient
+
+declare module 'telegraf' {
+  interface Telegraf {
+    mtproto: TelegramClient;
+  }
+}

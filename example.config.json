@@ -23,5 +23,9 @@
             "disabled": false
         }
     ],
-    "ignore_bots": true
+    "ignore_bots": true,
+    "owner": {
+        "discord": "123456789012345678",
+        "telegram": "123456789"
+    }
 }

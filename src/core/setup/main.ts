@@ -4,6 +4,11 @@ import { message } from 'telegraf/filters';
 import dsclient from '../discord.js';
 import tgclient from '../telegram.js';
 import chalk from 'chalk';
+import { Logger, TelegramClient } from 'telegram';
+import { StringSession } from 'telegram/sessions/StringSession.js';
+import { DeletedMessage, DeletedMessageEvent } from 'telegram/events/DeletedMessage.js'
+import { TextChannel } from 'discord.js';
+import fs from 'fs'
 
 
 export function clearOldMessages(tgBot: Telegraf, offset = -1): any {
@@ -136,3 +141,47 @@ export async function validateChannels() {
 	}
 	
 }
+
+async function deletedMessageEvent(event: DeletedMessageEvent) {
+	console.log("Got deleted message event, didn't expect that to work, create an issue on GitHub to let me know please!", event)
+	try {
+		for (let i = 0; i < global.config.bridges.length; i++) {
+			if (global.config.bridges[i].disabled) continue;
+			const discordChatId = global.config.bridges[i].discord.chat_id;
+			const telegramChatId = global.config.bridges[i].telegram.chat_id;
+			if (telegramChatId === event.chatId?.toString()) {
+				const msg = await global.db.collection('messages').findOne({ telegram: event._messageId?.toString() })
+				if (msg) {
+					const discordMsg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).messages.fetch(msg.discord)
+					await discordMsg.delete()
+					await global.db.collection('messages').deleteOne({ telegram: event._messageId?.toString() })
+				}
+			}
+		}
+	} catch (error) {
+		console.log(error)
+	}
+}
+
+export async function setupMtProto(tgclient: Telegraf) {
+	let stringSession = "";
+	try {
+		const file = fs.readFileSync(`${process.cwd()}/.string_session`, 'utf-8')
+		if (file) stringSession = file;
+	} catch (error) {
+
+	}
+
+	tgclient.mtproto = new TelegramClient(
+		new StringSession(stringSession),
+		parseInt(process.env.API_ID),
+		process.env.API_HASH,
+		{
+			connectionRetries: 5,
+			baseLogger: new Logger(undefined)
+		}
+	)
+
+	tgclient.mtproto.addEventHandler(deletedMessageEvent, new DeletedMessage({ chats: global.config.bridges.map(bridge => bridge.telegram.chat_id)}))
+}
+

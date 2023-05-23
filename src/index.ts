@@ -1,4 +1,4 @@
-import { clearOldMessages, validateChannels } from './core/setup/main.js';
+import { clearOldMessages, setupMtProto } from './core/setup/main.js';
 import { config as DotEnvConfig } from "dotenv";
 import { Db, MongoClient } from 'mongodb'
 import chalk from 'chalk'
@@ -37,11 +37,29 @@ if (JSON.stringify(Object.keys(GHConfigJson)).length > JSON.stringify(Object.key
     })
     fs.writeFileSync(`${process.cwd()}/config.json`, JSON.stringify(global.config, null, 4))
 }
+
+const chatIds: number[] = []
+
+for (let bridge of global.config.bridges) {
+    chatIds.push(parseInt(bridge.telegram.chat_id))
+}
 global.db = client.db()
 
 await clearOldMessages(telegram)
 telegram.launch()
 discord.login(process.env.DISCORDTOKEN)
+if (process.env.API_ID && process.env.API_HASH) {
+    await setupMtProto(telegram)
+    await telegram.mtproto.start({
+        botAuthToken: process.env.TGTOKEN
+    })
+
+    fs.writeFileSync(`${process.cwd()}/.string_session`, `${telegram.mtproto.session.save()}`)
+} else {
+    console.log(chalk.yellow('API_ID and API_HASH not found, skipping MTProto setup'))
+}
+
+
 
 process.on('uncaughtException', (err) => {
     console.log(err);
@@ -67,6 +85,8 @@ declare global {
             DISCORDTOKEN: string;
             TGTOKEN: string;
             MONGO_URI: string;
+            API_ID: string;
+            API_HASH: string;
         }
     }
 }
@@ -85,6 +105,10 @@ interface Config {
     }[]
     ignore_bots: boolean;
     [key: string]: any;
+    owner: {
+        discord: string;
+        telegram: string;
+    }
 }
 
 

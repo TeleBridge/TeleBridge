@@ -1,4 +1,4 @@
-import { APIEmbed, ActivityType, Routes, StickerFormatType, TextChannel, GatewayIntentBits, Client, Partials, APIApplicationCommand, Collection, ChatInputCommandInteraction, CacheType, Interaction, ApplicationCommandOption, ApplicationCommandType } from 'discord.js';
+import { APIEmbed, ActivityType, Routes, StickerFormatType, TextChannel, GatewayIntentBits, Client, Partials, APIApplicationCommand, Collection, ChatInputCommandInteraction, CacheType, Interaction, ApplicationCommandOption, ApplicationCommandType, Message } from 'discord.js';
 import { default as tgclient } from './telegram.js'
 import 'dotenv/config'
 import jimp from 'jimp'
@@ -13,10 +13,11 @@ const dsclient = new Client({
         GatewayIntentBits.MessageContent
     ],
     allowedMentions: { repliedUser: false },
-    partials: [ Partials.Channel ]
+    partials: [Partials.Channel]
 });
 
 dsclient.commands = new Collection()
+dsclient.msgCommands = new Collection()
 
 
 dsclient.on('ready', async () => {
@@ -25,6 +26,10 @@ dsclient.on('ready', async () => {
     let commandsArray: any[] = [];
     for (const file of commandFiles) {
         const command: Command = await import(`${process.cwd()}/dist/core/commands/discord/${file}`);
+        if (command.messageContent) {
+            dsclient.msgCommands.set(command.name, command);
+            continue;
+        }
         commandsArray.push({
             name: command.name,
             description: command.description,
@@ -60,7 +65,7 @@ dsclient.on('interactionCreate', async (interaction) => {
     try {
         await command.execute(dsclient, interaction);
     } catch (error) {
-        
+
     }
 })
 
@@ -80,7 +85,7 @@ dsclient.on('messageCreate', async (message) => {
             let msgcontent: string;
             if (message.cleanContent) { msgcontent = md2html(escapeHTMLSpecialChars(message.cleanContent)); } else { msgcontent = ''; }
 
-            if (message.stickers.size > 0 && !message.reference)  {
+            if (message.stickers.size > 0 && !message.reference) {
                 const sticker = message.stickers.first();
                 if (sticker?.format === StickerFormatType.Lottie || sticker?.format === StickerFormatType.APNG) {
                     const msg = await tgclient.telegram.sendMessage(telegramChatId, `<b>${message.author.tag}</b>:\n<i>Lottie/APNG stickers are currently not supported, sending the message content</i>\n${msgcontent}`, { parse_mode: 'HTML' })
@@ -116,8 +121,8 @@ dsclient.on('messageCreate', async (message) => {
 
 
                         const buffer = await image.resize(512, 512).getBufferAsync(jimp.MIME_PNG)
-                        await tgclient.telegram.sendMessage(telegramChatId, `<b>${message.author.tag}</b>:\n${msgcontent}`, { reply_to_message_id: parseInt(msgid.telegram) ,parse_mode: 'HTML' })
-                        const msg = await tgclient.telegram.sendSticker(telegramChatId, {source: buffer}, { reply_to_message_id: parseInt(msgid.telegram) })
+                        await tgclient.telegram.sendMessage(telegramChatId, `<b>${message.author.tag}</b>:\n${msgcontent}`, { reply_to_message_id: parseInt(msgid.telegram), parse_mode: 'HTML' })
+                        const msg = await tgclient.telegram.sendSticker(telegramChatId, { source: buffer }, { reply_to_message_id: parseInt(msgid.telegram) })
                         await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id, chatIds: { telegram: telegramChatId, discord: discordChatId } })
                         return;
                     }
@@ -141,6 +146,13 @@ dsclient.on('messageCreate', async (message) => {
             const msg = await tgclient.telegram.sendMessage(telegramChatId, `<b>${message.author.tag}</b>:\n${msgcontent} ${string}`, { parse_mode: 'HTML' })
             await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id, chatIds: { telegram: telegramChatId, discord: discordChatId } });
         }
+    }
+    if (message.content.startsWith("!")) {
+        const command = message.content.split(" ")[0].replace("!", "")
+        const args = message.content.split(" ").slice(1)
+        const cmd = dsclient.msgCommands.get(command);
+        if (!cmd) return;
+        await cmd.msgExecute(dsclient, message, args)
     }
 
 })
@@ -181,6 +193,7 @@ export default dsclient;
 declare module 'discord.js' {
     interface Client {
         commands: Collection<string, Command>;
+        msgCommands: Collection<string, Command>;
     }
 }
 
@@ -189,5 +202,7 @@ interface Command {
     description: string;
     dm_permission: boolean;
     options: ApplicationCommandOption[];
+    messageContent: boolean;
     execute: (client: Client, interaction: Interaction) => void | Promise<void>;
+    msgExecute: (client: Client, message: Message, args: string[]) => void | Promise<void>;
 }
