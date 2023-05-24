@@ -5,10 +5,39 @@ import chalk from 'chalk'
 DotEnvConfig({
     path: `${process.cwd()}/.env`
 })
-
 import discord from './core/discord.js';
 import telegram from './core/telegram.js';
 import fs from 'fs';
+import { channelPost, editedChannelPost, editedMessage, message } from 'telegraf/filters'
+
+const eventsFolders = fs.readdirSync(process.cwd() + '/dist/core/events/telegram')
+
+for (const folder of eventsFolders) {
+  const eventFiles = fs.readdirSync(process.cwd() + `/dist/core/events/telegram/${folder}`).filter(file => file.endsWith('.js'))
+  for (const file of eventFiles) {
+    const event = await import(`./core/events/telegram/${folder}/${file}`)
+
+    const filters: any = {
+      "editedMessage": editedMessage(event.name),
+      "message": message(event.name),
+      "editedChannelPost": editedChannelPost(event.name),
+      "channelPost": channelPost(event.name)
+    }
+
+    telegram.on(filters[folder], async (ctx) => event.execute(telegram, discord, ctx))
+  }
+}
+
+const eventFiles = fs.readdirSync(`${process.cwd()}/dist/core/events/discord`).filter(file => file.endsWith('.js'));
+
+for (const file of eventFiles) {
+    const event = await import(`${process.cwd()}/dist/core/events/discord/${file}`);
+    if (event.name === 'ready') {
+        discord.once(event.name, (...args) => event.execute(discord, ...args));
+        continue;
+    }
+    discord.on(event.name, (...args) => event.execute(discord, telegram, ...args));
+}
 
 const GHpackageJson = await (await fetch("https://raw.githubusercontent.com/TeleBridge/TeleBridge/master/package.json")).json()
 const packageJson = JSON.parse(fs.readFileSync(`${process.cwd()}/package.json`, 'utf-8'))
