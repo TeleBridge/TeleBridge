@@ -1,7 +1,7 @@
 {
   "name": "telebridge",
   "displayName": "TeleBridge",
-  "version": "2.7.3",
+  "version": "2.7.4",
   "description": "A bridge between Telegram and Discord",
   "license": "GNU",
   "repository": {
