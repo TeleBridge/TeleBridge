@@ -1,6 +1,6 @@
 import { Context, Telegraf } from 'telegraf';
 import { Update } from 'typegram';
-import { message } from 'telegraf/filters';
+import { editedMessage, message } from 'telegraf/filters';
 import dsclient from '../discord.js';
 import tgclient from '../telegram.js';
 import chalk from 'chalk';
@@ -42,6 +42,7 @@ export function handleUser(ctx: Context) {
 	let extraargs;
 	if (!ctx.message || !ctx.chat) return undefined;
 	let forwardFromChatTitle: string = "";
+        let forwardName: string | undefined = "";
 	if (ctx.has(message("forward_from_chat")) && ctx.message.forward_from_chat.type === "private") forwardFromChatTitle = ctx.message.forward_from_chat.first_name;
 	if (ctx.has(message("forward_from_chat")) && ctx.message.forward_from_chat.type === "channel") forwardFromChatTitle = ctx.message.forward_from_chat.title;
 	if (ctx.chat.type === "private") return undefined;
@@ -53,6 +54,18 @@ export function handleUser(ctx: Context) {
 			username = ctx.message.from.username;
 			break;
 	}
+        switch ((ctx.has(message("text")) && ctx.message.forward_from)) {
+		case undefined: 
+			if(ctx.has(message("text")) && ctx.message.forward_sender_name){
+				 forwardName = ctx.message.forward_sender_name;
+			} else {
+				forwardName = undefined;
+			}
+			break;
+		default:
+			if(ctx.has(message("text")) && ctx.message.forward_from) forwardName = ctx.message.forward_from.username
+			break;
+        }
 	if (ctx.has(message("text")) && ctx.message.reply_to_message !== undefined) {
 		switch (ctx.message.reply_to_message.from?.username) {
 			case undefined:
@@ -65,7 +78,8 @@ export function handleUser(ctx: Context) {
 	}
 	if (ctx.has(message("text")) && ctx.message.is_automatic_forward) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.message.forward_sender_name }
 	if (ctx.has(message("forward_from_chat"))) { extraargs = `(Forwarded by ${username})`; username = forwardFromChatTitle }
-	if (ctx.has(message("text")) && ctx.message.forward_from) { extraargs = `(Forwarded from **${ctx.message.forward_from.username}**)`; }
+	if (ctx.has(message("text")) && forwardName) { extraargs = `(Forwarded from **${forwardName}**)`; }
+	if(ctx.has(message("text")) && ctx.message.via_bot) { extraargs = `(Via **${ctx.message.via_bot.username}**)`; }
 	if (userreply) { extraargs = `(Replying to ${userreply})`; }
 	if (extraargs === undefined) extraargs = '';
 	if (userreply === undefined) userreply = '';
@@ -75,11 +89,12 @@ export function handleUser(ctx: Context) {
 }
 
 
-export function handleEditedUser(ctx: any) {
+export function handleEditedUser(ctx: Context) {
 	let username;
 	let userreply;
 	let extraargs;
 	if (!ctx.editedMessage || !ctx.chat) return undefined;
+	if (ctx.chat.type === "private") return undefined;
 	switch (ctx.editedMessage.from.username) {
 		case undefined:
 			username = ctx.editedMessage.from.first_name;
@@ -88,7 +103,8 @@ export function handleEditedUser(ctx: any) {
 			username = ctx.editedMessage.from.username;
 			break;
 	}
-	if (ctx.has(message("text")) && ctx.editedMessage.reply_to_message != undefined) {
+
+	if (ctx.has(editedMessage("text")) && ctx.editedMessage.reply_to_message !== undefined) {
 		switch (ctx.editedMessage.reply_to_message.from?.username) {
 			case undefined:
 				userreply = ctx.editedMessage.reply_to_message.from?.first_name;
@@ -98,14 +114,14 @@ export function handleEditedUser(ctx: any) {
 				break;
 		}
 	}
-	if (ctx.has(message("text")) && ctx.editedMessage.is_automatic_forward) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.editedMessage.forward_sender_name }
-	if (ctx.has(message("forward_from_chat"))) { extraargs = `(Forwarded from ${username})`; username = ctx.editedMessage.forward_from_chat.title }
-	if (ctx.has(message("text")) && ctx.editedMessage.forward_from) { extraargs = `(Forwarded by **${ctx.editedMessage.forward_from.username}**)`; }
+	if (ctx.has(editedMessage("text")) && ctx.editedMessage.is_automatic_forward) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.editedMessage.forward_sender_name }
+	if (ctx.has(editedMessage("text")) && ctx.editedMessage.via_bot) { extraargs = `(Via **${ctx.editedMessage.via_bot.username}**)`; }
 	if (userreply) { extraargs = `(Replying to ${userreply})`; }
 	if (extraargs === undefined) extraargs = '';
 	if (userreply === undefined) userreply = '';
 	if (username === undefined) username = '';
 	return { username, userreply, extraargs }
+
 
 }
 
