@@ -14,6 +14,7 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
             const telegramChatId = global.config.bridges[i].telegram.chat_id;
             if (parseInt(telegramChatId) === ctx.chat.id) {
                 let user = handleUser(ctx)
+
                 if (!user) return;
                 let username = user.username
                 let extraargs = user.extraargs
@@ -24,9 +25,9 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                     let link = await ctx.telegram.getFileLink(image);
                     atarray.push(link.href)
                 }
-                ctx.message.message_id
+
                 let array2 = []
-                let at = new AttachmentBuilder(atarray[atarray.length - 1], { name: `image${atarray[atarray.length - 1]}.jpg` })
+                const at = new AttachmentBuilder(atarray[atarray.length - 1], { name: `image${atarray[atarray.length - 1]}.jpg` })
                 array2.push(at)
                 let msgcontent;
                 switch (ctx.message.caption) {

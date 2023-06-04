@@ -36,13 +36,42 @@ export function escapeChars(text: string) {
 		.replace("_", "\\_")
 }
 
+export function replaceEmojis(text: string) {
+	const emojiRegex = /<a:(.*?):\d+>|\s*<:(.*?):\d+>/g;
+	const emojiMatches = text.match(emojiRegex);
+	if (emojiMatches) {
+		for (const emojiMatch of emojiMatches) {
+			const emojiName = emojiMatch.split(":")[1];
+			text = text.replace(
+				emojiMatch,
+				`:${emojiName}:`
+			);
+		}
+	}
+	return text;
+}
+
+export function md2html(text: string): string {
+	text = text
+		.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+		.replace(/__(.*?)__/g, "<u>$1</u>")
+		.replace(/\*(.*?)\*/g, "<i>$1</i>")
+		.replace(/_(.*?)_/g, "<i>$1</i>")
+		.replace(/~~(.*?)~~/g, "<s>$1</s>")
+		.replace(/\|\|(.*?)\|\|/g, "<tg-spoiler>$1</tg-spoiler>")
+		.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+	return text
+}
+
+
 export function handleUser(ctx: Context) {
 	let username;
 	let userreply;
 	let extraargs;
 	if (!ctx.message || !ctx.chat) return undefined;
 	let forwardFromChatTitle: string = "";
-        let forwardName: string | undefined = "";
+	let forwardName: string | undefined = "";
 	if (ctx.has(message("forward_from_chat")) && ctx.message.forward_from_chat.type === "private") forwardFromChatTitle = ctx.message.forward_from_chat.first_name;
 	if (ctx.has(message("forward_from_chat")) && ctx.message.forward_from_chat.type === "channel") forwardFromChatTitle = ctx.message.forward_from_chat.title;
 	if (ctx.chat.type === "private") return undefined;
@@ -54,19 +83,11 @@ export function handleUser(ctx: Context) {
 			username = ctx.message.from.username;
 			break;
 	}
-        switch ((ctx.has(message("text")) && ctx.message.forward_from)) {
-		case undefined: 
-			if(ctx.has(message("text")) && ctx.message.forward_sender_name){
-				 forwardName = ctx.message.forward_sender_name;
-			} else {
-				forwardName = undefined;
-			}
-			break;
-		default:
-			if(ctx.has(message("text")) && ctx.message.forward_from) forwardName = ctx.message.forward_from.username
-			break;
-        }
-	if (ctx.has(message("text")) && ctx.message.reply_to_message !== undefined) {
+	if (ctx.has(message("forward_from"))) {
+		forwardName = ctx.message.forward_from.username
+	} else if (ctx.has(message("forward_sender_name"))) forwardName = ctx.message.forward_sender_name;
+
+	if (ctx.has(message("reply_to_message"))) {
 		switch (ctx.message.reply_to_message.from?.username) {
 			case undefined:
 				userreply = ctx.message.reply_to_message.from?.first_name;
@@ -76,10 +97,10 @@ export function handleUser(ctx: Context) {
 				break;
 		}
 	}
-	if (ctx.has(message("text")) && ctx.message.is_automatic_forward) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.message.forward_sender_name }
+	if (ctx.has(message("is_automatic_forward"))) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.message.forward_sender_name }
 	if (ctx.has(message("forward_from_chat"))) { extraargs = `(Forwarded by ${username})`; username = forwardFromChatTitle }
-	if (ctx.has(message("text")) && forwardName) { extraargs = `(Forwarded from **${forwardName}**)`; }
-	if(ctx.has(message("text")) && ctx.message.via_bot) { extraargs = `(Via **${ctx.message.via_bot.username}**)`; }
+	if (forwardName) { extraargs = `(Forwarded from **${forwardName}**)`; }
+	if (ctx.has(message("via_bot"))) { extraargs = `(Via **${ctx.message.via_bot.username}**)`; }
 	if (userreply) { extraargs = `(Replying to ${userreply})`; }
 	if (extraargs === undefined) extraargs = '';
 	if (userreply === undefined) userreply = '';
@@ -104,7 +125,7 @@ export function handleEditedUser(ctx: Context) {
 			break;
 	}
 
-	if (ctx.has(editedMessage("text")) && ctx.editedMessage.reply_to_message !== undefined) {
+	if (ctx.has(editedMessage("text" || "caption")) && ctx.editedMessage.reply_to_message !== undefined) {
 		switch (ctx.editedMessage.reply_to_message.from?.username) {
 			case undefined:
 				userreply = ctx.editedMessage.reply_to_message.from?.first_name;
@@ -114,8 +135,8 @@ export function handleEditedUser(ctx: Context) {
 				break;
 		}
 	}
-	if (ctx.has(editedMessage("text")) && ctx.editedMessage.is_automatic_forward) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.editedMessage.forward_sender_name }
-	if (ctx.has(editedMessage("text")) && ctx.editedMessage.via_bot) { extraargs = `(Via **${ctx.editedMessage.via_bot.username}**)`; }
+	if (ctx.has(editedMessage("text" || "caption")) && ctx.editedMessage.is_automatic_forward) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.editedMessage.forward_sender_name }
+	if (ctx.has(editedMessage("text" || "caption")) && ctx.editedMessage.via_bot) { extraargs = `(Via **${ctx.editedMessage.via_bot.username}**)`; }
 	if (userreply) { extraargs = `(Replying to ${userreply})`; }
 	if (extraargs === undefined) extraargs = '';
 	if (userreply === undefined) userreply = '';
@@ -150,12 +171,12 @@ export async function validateChannels() {
 				console.log(chalk.yellow("Invalid Telegram chat at bridge \"" + bridge.name + "\", disabling the bridge (the messages of that bridge won't be forwarded)"))
 				bridge.disabled = true;
 			}
-			} catch (error) {
+		} catch (error) {
 			throw new Error(`${error}`)
 		}
 
 	}
-	
+
 }
 
 async function deletedMessageEvent(event: DeletedMessageEvent) {
@@ -198,6 +219,6 @@ export async function setupMtProto(tgclient: Telegraf) {
 		}
 	)
 
-	tgclient.mtproto.addEventHandler(deletedMessageEvent, new DeletedMessage({ chats: global.config.bridges.map(bridge => bridge.telegram.chat_id)}))
+	tgclient.mtproto.addEventHandler(deletedMessageEvent, new DeletedMessage({ chats: global.config.bridges.map(bridge => bridge.telegram.chat_id) }))
 }
 

@@ -26,10 +26,10 @@ tgclient.command("eval", async (ctx) => {
       const evaluated = inspect(await eval(toEval));
 
       
-      return ctx.reply(`<code>\n${escapeHTMLSpecialChars(evaluated)}\n</code>`, { parse_mode: "HTML" });
+      return ctx.reply(`\`\`\`js\n${escapeHTMLSpecialChars(evaluated)}\n\`\`\``, { parse_mode: "MarkdownV2" });
     }
   } catch (e) {
-    return ctx.reply(`Error\n<code>js\n${escapeHTMLSpecialChars(`${e}`)}\n</code>`, { parse_mode: "HTML"});
+    return ctx.reply(`Error\n\`\`\`js\n${escapeHTMLSpecialChars(`${e}`)}\n\`\`\``, { parse_mode: "MarkdownV2"});
   }
 
     

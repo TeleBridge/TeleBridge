@@ -1,7 +1,6 @@
 import { Client, Message } from 'discord.js'
 import { Telegraf } from 'telegraf'
-import { escapeHTMLSpecialChars } from '../../setup/main.js';
-import md2html from '../../setup/md2html.js';
+import { escapeHTMLSpecialChars, md2html } from '../../setup/main.js';
 
 
 export const name = 'messageUpdate'
