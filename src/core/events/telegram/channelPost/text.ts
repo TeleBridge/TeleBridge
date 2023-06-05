@@ -28,6 +28,15 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                     ctx.deleteMessage()
                     return;
                 }
+                
+                if (ctx.channelPost.text.length >= 2000) {
+                    const message = await ctx.replyWithHTML('<i>Error: the message couldn\'t be processed because it exceeds Discord\'s maximum character limit (2000)</i>')
+                    setTimeout(() => {
+                        ctx.deleteMessage(message.message_id)
+                    }, 3000);
+                    return;
+                }
+
                 if (ctx.update.channel_post.reply_to_message) {
                     const msgid = await global.db.collection("messages").findOne({ telegram: ctx.update.channel_post.reply_to_message.message_id })
                     if (msgid) {

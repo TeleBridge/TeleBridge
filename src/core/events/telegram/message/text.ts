@@ -13,6 +13,14 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
             const discordChatId = global.config.bridges[i].discord.chat_id;
             const telegramChatId = global.config.bridges[i].telegram.chat_id;
             if (parseInt(telegramChatId) === ctx.chat.id) {
+                if (ctx.message.text.length >= 2000) {
+                    const message = await ctx.replyWithHTML('<i>Error: the message couldn\'t be processed because it exceeds Discord\'s maximum character limit (2000)</i>')
+                    setTimeout(() => {
+                        ctx.deleteMessage(message.message_id)
+                    }
+                        , 3000);
+                    return;
+                }
                 let user = handleUser(ctx)
                 if (!user) return;
                 let username = user.username

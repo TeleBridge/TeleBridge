@@ -27,6 +27,9 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                     default:
                         msgcontent = ctx.message.caption
                         break;
+                    case ctx.message.caption && ctx.message.caption.length >= 2000:
+                        msgcontent = `_Caption too long_`
+                        break;
                 }
                 let image = ctx.message.video.file_id;
                 let msgid;

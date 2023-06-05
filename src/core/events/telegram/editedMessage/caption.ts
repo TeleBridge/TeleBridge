@@ -23,6 +23,13 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                 const messageid = await global.db.collection("messages").findOne({ telegram: ctx.editedMessage.message_id })
 
                 if (messageid) {
+                    if (ctx.editedMessage.caption.length >= 2000) {
+                        const msgId = await ctx.telegram.sendMessage(ctx.chat.id, `<i>The caption is too long to be sent due to Discord's limits (2000 characters)`, { parse_mode: "HTML", reply_to_message_id: ctx.editedMessage.message_id })
+                        setTimeout(() => {
+                            ctx.telegram.deleteMessage(ctx.chat.id, msgId.message_id)
+                        }, 3000);
+                        return
+                    } 
                     const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).messages.fetch(messageid.discord)
                     await msg.edit({ content: `**${escapeChars(username)}** ${extraargs}:\n ${ctx.editedMessage.caption}` })
                 }

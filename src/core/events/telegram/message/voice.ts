@@ -13,6 +13,7 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
             const discordChatId = global.config.bridges[i].discord.chat_id;
             const telegramChatId = global.config.bridges[i].telegram.chat_id;
             if (parseInt(telegramChatId) === ctx.chat.id) {
+
                 let user = handleUser(ctx)
                 if (!user) return;
                 let username = user.username
@@ -25,6 +26,9 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                         break;
                     default:
                         msgcontent = ctx.message.caption
+                        break;
+                    case ctx.message.caption && ctx.message.caption.length >= 2000:
+                        msgcontent = `_Caption too long_`
                         break;
                 }
                 let image = ctx.message.voice.file_id;
