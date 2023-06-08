@@ -1,7 +1,8 @@
 import { APIActionRowComponent, APIBan, APIButtonComponent, Client, TextChannel } from "discord.js";
 import { Context, Telegraf, } from "telegraf";
-import { escapeChars, handleUser } from "../../../setup/main.js";
-import { channelPost, message } from "telegraf/filters";
+import { escapeChars } from "../../../setup/main.js";
+import { channelPost } from "telegraf/filters";
+import { toMarkdownV2 } from "@telebridge/entity";
 
 
 export const name = "text";
@@ -14,7 +15,7 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
             const telegramChatId = global.config.bridges[i].telegram.chat_id;
             if (parseInt(telegramChatId) === ctx.chat.id) {
                 let messageOptions: any = {
-                    content: `**${escapeChars(ctx.update.channel_post.chat.title)}**:\n ${ctx.update.channel_post.text}`
+                    content: `**${escapeChars(ctx.update.channel_post.chat.title)}**:\n ${toMarkdownV2(ctx.channelPost)}`
                 }
                 const buttons: APIActionRowComponent<APIButtonComponent> = {
                     type: 1,

@@ -2,6 +2,7 @@ import { Client, TextChannel } from "discord.js";
 import { Context, Telegraf, } from "telegraf";
 import { escapeChars, handleEditedUser } from "../../../setup/main.js";
 import { editedMessage } from "telegraf/filters";
+import { toMarkdownV2 } from "@telebridge/entity";
 
 
 export const name = "caption";
@@ -31,7 +32,7 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                         return
                     } 
                     const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).messages.fetch(messageid.discord)
-                    await msg.edit({ content: `**${escapeChars(username)}** ${extraargs}:\n ${ctx.editedMessage.caption}` })
+                    await msg.edit({ content: `**${escapeChars(username)}** ${extraargs}:\n ${toMarkdownV2(ctx.editedMessage)}` })
                 }
             }
         }

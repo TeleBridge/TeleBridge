@@ -2,6 +2,7 @@ import { APIActionRowComponent, APIButtonComponent, AttachmentBuilder, Client, T
 import { Context, Telegraf, } from "telegraf";
 import { escapeChars, getButtons, handleUser } from "../../../setup/main.js";
 import { message } from "telegraf/filters";
+import { toMarkdownV2 } from "@telebridge/entity";
 
 
 export const name = "video";
@@ -24,7 +25,7 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                         msgcontent = `_No caption_`
                         break;
                     default:
-                        msgcontent = ctx.message.caption
+                        msgcontent = toMarkdownV2(ctx.message)
                         break;
                     case ctx.message.caption && ctx.message.caption.length >= 2000:
                         msgcontent = `_Caption too long_`

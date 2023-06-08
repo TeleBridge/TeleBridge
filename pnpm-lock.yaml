@@ -1,9 +1,9 @@
 lockfileVersion: '6.0'
 
 dependencies:
-  '@telegraf/entity':
-    specifier: ^0.3.0
-    version: 0.3.0
+  '@telebridge/entity':
+    specifier: github:TeleBridge/entity
+    version: github.com/TeleBridge/entity/a14ac9c02a75a842e695f91a894e69aa96e0a659
   chalk:
     specifier: ^5.2.0
     version: 5.2.0
@@ -463,12 +463,6 @@ packages:
   /@sapphire/snowflake@3.5.1:
     resolution: {integrity: sha512-BxcYGzgEsdlG0dKAyOm0ehLGm2CafIrfQTZGWgkfKYbj+pNNsorZ7EotuZukc2MT70E0UbppVbtpBrqpzVzjNA==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-    dev: false
-
-  /@telegraf/entity@0.3.0:
-    resolution: {integrity: sha512-pipSkh6HNDqd2KW8KlWuekB9CknMv1kcQFc/qwAk6tBI74AQ/bVZOf3hLKhYbh8Dki3E1ywcrn+v+u2AZZFtUw==}
-    dependencies:
-      typegram: 5.0.0
     dev: false
 
   /@tokenizer/token@0.3.0:
@@ -1383,4 +1377,12 @@ packages:
   /yaeti@0.0.6:
     resolution: {integrity: sha512-MvQa//+KcZCUkBTIC9blM+CU9J2GzuTytsOUwf2lidtvkx/6gnEp1QvJv34t9vdjhFmha/mUiNDbN0D0mJWdug==}
     engines: {node: '>=0.10.32'}
+    dev: false
+
+  github.com/TeleBridge/entity/a14ac9c02a75a842e695f91a894e69aa96e0a659:
+    resolution: {tarball: https://codeload.github.com/TeleBridge/entity/tar.gz/a14ac9c02a75a842e695f91a894e69aa96e0a659}
+    name: '@telebridge/entity'
+    version: 0.0.0-dev
+    prepare: true
+    requiresBuild: true
     dev: false

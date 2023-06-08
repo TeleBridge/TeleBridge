@@ -2,6 +2,7 @@ import { APIActionRowComponent, APIButtonComponent, Client, TextChannel } from "
 import { Context, Telegraf, } from "telegraf";
 import { escapeChars, getButtons, handleUser } from "../../../setup/main.js";
 import { message } from "telegraf/filters";
+import { toMarkdownV2 } from "@telebridge/entity";
 
 
 export const name = "text";
@@ -27,7 +28,7 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                 let extraargs = user.extraargs
                 let userreply = user.userreply
                 let messageOptions: any = {
-                    content: `**${escapeChars(username)}** ${extraargs}:\n ${ctx.message.text}`
+                    content: `**${escapeChars(username)}** ${extraargs}:\n ${toMarkdownV2(ctx.message)}`
                 }
                 let buttons;
                 if (ctx.message.reply_markup) {
