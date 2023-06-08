@@ -1,4 +1,4 @@
-import { Context, Telegraf } from 'telegraf';
+import { Context, Markup, Telegraf } from 'telegraf';
 import { Update } from 'typegram';
 import { editedMessage, message } from 'telegraf/filters';
 import dsclient from '../discord.js';
@@ -7,7 +7,7 @@ import chalk from 'chalk';
 import { Logger, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions/StringSession.js';
 import { DeletedMessage, DeletedMessageEvent } from 'telegram/events/DeletedMessage.js'
-import { TextChannel } from 'discord.js';
+import { APIActionRowComponent, APIButtonComponent, ActionRow, TextChannel } from 'discord.js';
 import fs from 'fs'
 
 
@@ -146,6 +146,37 @@ export function handleEditedUser(ctx: Context) {
 
 }
 
+export function getButtons(ctx: Context) {
+	let row: APIActionRowComponent<APIButtonComponent> = {
+		type: 1,
+		components: []
+	}
+	if (ctx.chat && ctx.chat.type === "private") return;
+
+	
+	// ah, good old @ts-expect-error
+	/*
+	Property 'reply_markup' does not exist on type 'New & NonChannel & Message'.
+  	Property 'reply_markup' does not exist on type 'New & NonChannel & ChannelChatCreatedMessage'.
+   */
+	// @ts-expect-error
+	const keyboard = ctx.message?.reply_markup?.inline_keyboard[0].filter((k: any) => k.url)
+	if (keyboard && keyboard.length > 0) {
+		for (let button of keyboard) {
+			if (!button.url) continue;
+			row.components.push({
+				type: 2,
+				label: button.text,
+				style: 5,
+				url: button.url
+			})
+		}
+	} else {
+		return undefined;
+	}
+	return row;
+
+}
 
 // Doesn't work with discord, don't even bother trying
 // if you still want to do some fuckery with this code, install https://github.com/bbc/audiowaveform

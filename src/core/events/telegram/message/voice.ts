@@ -1,6 +1,6 @@
-import { Client, TextChannel } from "discord.js";
+import { APIActionRowComponent, APIButtonComponent, Client, TextChannel } from "discord.js";
 import { Context, Telegraf, } from "telegraf";
-import { GenerateBase64Waveform, escapeChars, handleUser } from "../../../setup/main.js";
+import { GenerateBase64Waveform, escapeChars, getButtons, handleUser } from "../../../setup/main.js";
 import { message } from "telegraf/filters";
 
 
@@ -19,6 +19,16 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                 let username = user.username
                 let extraargs = user.extraargs
                 let userreply = user.userreply
+                let messageOptions: any = {
+                }
+                let buttons;
+                if (ctx.message.reply_markup) {
+                    buttons = getButtons(ctx)
+                    messageOptions = {
+                        ...messageOptions,
+                        components: [buttons as APIActionRowComponent<APIButtonComponent>]
+                    }
+                }
                 let msgcontent;
                 switch (ctx.message.caption) {
                     case undefined:
@@ -64,7 +74,7 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
 
                     if (msgid) {
                         const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).messages.fetch(msgid.discord)
-                        await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n Voice Message ⬇️` })
+                        await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n${msgcontent}\n Voice Message ⬇️` })
                         const res = await fetch("https://discord.com/api/v10/channels/" + discordChatId + "/messages", {
                             method: "POST",
                             body: JSON.stringify({
@@ -81,6 +91,7 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                                     guild_id: msg.guild.id
                                 },
                                 allowed_mentions: { repliedUser: false },
+                                ...messageOptions,
                                 flags: 8192
                             }),
                             headers: {
@@ -95,7 +106,7 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                         return;
                     }
 
-                    (dsclient.channels.cache.get(discordChatId) as TextChannel).send({ content: `**${escapeChars(username)}** ${extraargs}:\n Voice Message ⬇️` })
+                    (dsclient.channels.cache.get(discordChatId) as TextChannel).send({ content: `**${escapeChars(username)}** ${extraargs}:\n${msgcontent}\n Voice Message ⬇️` })
 
                     const res = await fetch("https://discord.com/api/v10/channels/" + discordChatId + "/messages", {
                         method: "POST",
@@ -107,7 +118,8 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                                 "duration_secs": ctx.message.voice.duration,
                                 waveform: waveform
                             }],
-                            flags: 8192
+                            flags: 8192,
+                            ...messageOptions
                         }),
                         headers: {
                             'x-super-properties': 'eyJvcyI6IldpbmRvd3MiLCJjbGllbnRfYnVpbGRfbnVtYmVyIjo5OTk5OTk5fQ==',

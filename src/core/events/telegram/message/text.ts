@@ -1,6 +1,6 @@
-import { Client, TextChannel } from "discord.js";
+import { APIActionRowComponent, APIButtonComponent, Client, TextChannel } from "discord.js";
 import { Context, Telegraf, } from "telegraf";
-import { escapeChars, handleUser } from "../../../setup/main.js";
+import { escapeChars, getButtons, handleUser } from "../../../setup/main.js";
 import { message } from "telegraf/filters";
 
 
@@ -26,16 +26,28 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                 let username = user.username
                 let extraargs = user.extraargs
                 let userreply = user.userreply
+                let messageOptions: any = {
+                    content: `**${escapeChars(username)}** ${extraargs}:\n ${ctx.message.text}`
+                }
+                let buttons;
+                if (ctx.message.reply_markup) {
+                    buttons = getButtons(ctx)
+                    messageOptions = {
+                        ...messageOptions,
+                        components: [buttons as APIActionRowComponent<APIButtonComponent>]
+                    }
+                }
+
                 if (ctx.message.reply_to_message) {
                     const msgid = await global.db.collection("messages").findOne({ telegram: ctx.message.reply_to_message.message_id })
                     if (msgid) {
                         const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).messages.fetch(msgid.discord)
-                        const newmsg = await msg.reply(`**${escapeChars(username)}** ${extraargs}:\n ${ctx.message.text}`)
+                        const newmsg = await msg.reply(messageOptions)
                         await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: newmsg.id, chatIds: { discord: discordChatId, telegram: telegramChatId } })
                         return;
                     }
                 }
-                const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).send(`**${escapeChars(username)}** ${extraargs}:\n ${ctx.message.text}`);
+                const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).send(messageOptions);
                 await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id, chatIds: { discord: discordChatId, telegram: telegramChatId } })
             }
         }

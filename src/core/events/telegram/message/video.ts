@@ -1,6 +1,6 @@
-import { AttachmentBuilder, Client, TextChannel } from "discord.js";
+import { APIActionRowComponent, APIButtonComponent, AttachmentBuilder, Client, TextChannel } from "discord.js";
 import { Context, Telegraf, } from "telegraf";
-import { escapeChars, handleUser } from "../../../setup/main.js";
+import { escapeChars, getButtons, handleUser } from "../../../setup/main.js";
 import { message } from "telegraf/filters";
 
 
@@ -18,7 +18,6 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                 let username = user.username
                 let extraargs = user.extraargs
                 let userreply = user.userreply
-
                 let msgcontent;
                 switch (ctx.message.caption) {
                     case undefined:
@@ -31,6 +30,17 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                         msgcontent = `_Caption too long_`
                         break;
                 }
+                let messageOptions: any = {
+                    content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`
+                }
+                let buttons;
+                if (ctx.message.reply_markup) {
+                    buttons = getButtons(ctx)
+                    messageOptions = {
+                        ...messageOptions,
+                        components: [buttons as APIActionRowComponent<APIButtonComponent>]
+                    }
+                }
                 let image = ctx.message.video.file_id;
                 let msgid;
                 try {
@@ -42,21 +52,21 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                     }
                     if (msgid) {
                         const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).messages.fetch(msgid.discord)
-                        const newmsg = await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: [attachment] })
+                        const newmsg = await msg.reply({ ...messageOptions, files: [attachment] })
                         await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: newmsg.id, chatIds: { discord: discordChatId, telegram: telegramChatId } })
                         return;
                     }
-                    const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).send({ content: `**${escapeChars(username)}** ${extraargs}:\n ${msgcontent}`, files: [attachment] });
+                    const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).send({ ...messageOptions, files: [attachment] });
                     await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id, chatIds: { discord: discordChatId, telegram: telegramChatId } })
                 } catch (error) {
                     const message = await ctx.replyWithHTML('<i>Error: the file couldn\'t be processed because it exceeds Discord\'s maximum file size (25MB)</i>')
                     if (msgid) {
                         const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).messages.fetch(msgid.discord)
-                        const newmsg = await msg.reply(`**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`)
+                        const newmsg = await msg.reply({ content: `**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}` })
                         await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: newmsg.id, chatIds: { discord: discordChatId, telegram: telegramChatId } })
                         return;
                     }
-                    const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).send(`**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}`);
+                    const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).send({ content: `**${escapeChars(username)}** ${extraargs}:\n_I couldn\'t send the attachment, sending the message content_\n${msgcontent}` });
                     await global.db.collection('messages').insertOne({ telegram: ctx.message.message_id, discord: msg.id, chatIds: { discord: discordChatId, telegram: telegramChatId } })
 
                     setTimeout(() => {
