@@ -1,4 +1,4 @@
-import { Context, Markup, Telegraf } from 'telegraf';
+import { Context, Telegraf } from 'telegraf';
 import { Update } from 'typegram';
 import { editedMessage, message } from 'telegraf/filters';
 import dsclient from '../discord.js';
@@ -7,8 +7,10 @@ import chalk from 'chalk';
 import { Logger, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions/StringSession.js';
 import { DeletedMessage, DeletedMessageEvent } from 'telegram/events/DeletedMessage.js'
-import { APIActionRowComponent, APIButtonComponent, ActionRow, TextChannel } from 'discord.js';
+import { APIActionRowComponent, APIButtonComponent, TextChannel } from 'discord.js';
 import fs from 'fs'
+import { msgExecute } from '../commands/discord/eval.js';
+import { telegramBaseClient } from 'telegram/client/index.js';
 
 
 export function clearOldMessages(tgBot: Telegraf, offset = -1): any {
@@ -83,10 +85,6 @@ export function handleUser(ctx: Context) {
 			username = ctx.message.from.username;
 			break;
 	}
-	if (ctx.has(message("forward_from"))) {
-		forwardName = ctx.message.forward_from.username
-	} else if (ctx.has(message("forward_sender_name"))) forwardName = ctx.message.forward_sender_name;
-
 	if (ctx.has(message("reply_to_message"))) {
 		switch (ctx.message.reply_to_message.from?.username) {
 			case undefined:
@@ -97,16 +95,39 @@ export function handleUser(ctx: Context) {
 				break;
 		}
 	}
-	if (ctx.has(message("is_automatic_forward"))) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.message.forward_sender_name }
-	if (ctx.has(message("forward_from_chat"))) { extraargs = `(Forwarded by ${username})`; username = forwardFromChatTitle }
-	if (forwardName) { extraargs = `(Forwarded from **${forwardName}**)`; }
-	if (ctx.has(message("via_bot"))) { extraargs = `(Via **${ctx.message.via_bot.username}**)`; }
-	if (userreply) { extraargs = `(Replying to ${userreply})`; }
-	if (extraargs === undefined) extraargs = '';
-	if (userreply === undefined) userreply = '';
-	if (username === undefined) username = '';
-	return { username, userreply, extraargs }
+	if (ctx.has(message("is_automatic_forward")) && ctx.has(message("forward_from_chat"))) {
+		if (ctx.message.forward_from_chat.type === "channel") {
+			extraargs = `(_Automatic Forward from channel_)`;
+			username = forwardFromChatTitle;
+		}
+	}
+	if (ctx.has(message("forward_from_chat")) && !ctx.has(message("is_automatic_forward")) && ctx.message.forward_from_chat.type !== "private") {
+		extraargs = `(Forwarded by ${username})`;
+		username = ctx.message.forward_from_chat.title;
+	}
 
+	if (ctx.from?.username === "GroupAnonymousBot" && ctx.message.sender_chat && ctx.message.sender_chat.type !== 'private') {
+		extraargs = `(Anonymous Group Admin)`;
+		username = ctx.message.sender_chat.title;
+	}
+
+	if (forwardName) {
+		extraargs = `(Forwarded from **${forwardName}**)`;
+	}
+
+	if (ctx.has(message("via_bot"))) {
+		extraargs = `(Via **${ctx.message.via_bot.username}**)`;
+	}
+
+	if (userreply) {
+		extraargs = `(Replying to ${userreply})`;
+	}
+
+	extraargs ??= '';
+	userreply ??= '';
+	username ??= '';
+
+	return { username, userreply, extraargs };
 }
 
 
@@ -253,3 +274,30 @@ export async function setupMtProto(tgclient: Telegraf) {
 	tgclient.mtproto.addEventHandler(deletedMessageEvent, new DeletedMessage({ chats: global.config.bridges.map(bridge => bridge.telegram.chat_id) }))
 }
 
+export async function setDeletedCheckTimeout() {
+	if (!tgclient.mtproto) {
+		console.log(chalk.red("MTProto needs to be set up to use the deleted message check. Check the GitHub page for more info."))
+		return;
+	}
+	if (global.config.check_for_deleted_messages === false) return;
+	
+
+	const timeout = global.config.deleted_message_check_interval * 60 * 1000;
+
+	setInterval(async () => {
+		for (let bridge of global.config.bridges) {
+			if (bridge.disabled) continue;
+			const messages = await global.db.collection('messages').find({ "chatIds.telegram": bridge.telegram.chat_id }).sort({ _id: -1 }).limit(5).toArray()
+			for (let message of messages) {
+				const msg = await tgclient.mtproto.getMessages(bridge.telegram.chat_id, { ids: [message.telegram] })
+				if (msg[0] === undefined) {
+					await global.db.collection('messages').deleteOne({ telegram: message.telegram })
+					const discordMsg = await (dsclient.channels.cache.get(bridge.discord.chat_id) as TextChannel).messages.fetch(message.discord)
+					if(discordMsg) await discordMsg.delete()
+				}
+			}
+
+		}
+	}, timeout)
+
+}

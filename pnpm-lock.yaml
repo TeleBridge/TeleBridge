@@ -3,7 +3,7 @@ lockfileVersion: '6.0'
 dependencies:
   '@telebridge/entity':
     specifier: github:TeleBridge/entity
-    version: github.com/TeleBridge/entity/a14ac9c02a75a842e695f91a894e69aa96e0a659
+    version: github.com/TeleBridge/entity/75cc68df12a484e136b44e46603383e477d7b368
   chalk:
     specifier: ^5.2.0
     version: 5.2.0
@@ -1379,8 +1379,8 @@ packages:
     engines: {node: '>=0.10.32'}
     dev: false
 
-  github.com/TeleBridge/entity/a14ac9c02a75a842e695f91a894e69aa96e0a659:
-    resolution: {tarball: https://codeload.github.com/TeleBridge/entity/tar.gz/a14ac9c02a75a842e695f91a894e69aa96e0a659}
+  github.com/TeleBridge/entity/75cc68df12a484e136b44e46603383e477d7b368:
+    resolution: {tarball: https://codeload.github.com/TeleBridge/entity/tar.gz/75cc68df12a484e136b44e46603383e477d7b368}
     name: '@telebridge/entity'
     version: 0.0.0-dev
     prepare: true

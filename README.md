@@ -62,16 +62,25 @@ You can edit TeleBridge's settings by editing the [config.json](https://github.c
 |------------|------------|-----------------------------------|
 | Bridges    | Array      | Array of bridges (chats to bridge)|
 | ignore_bots | boolean (true, false) | Choose if you want to hide the bots' messages when bridging a message to Telegram |
+| owner      | Object     | Declares the user IDs of the bot owner for commands like eval |
+| check_for_deleted_messages | boolean (true, false) | Choose if you want to check for messages getting deleted or not every x minutes set in the config (MTProto required) (can get your bot ratelimited) |
+| deleted_message_check_interval | number | Interval for message checking (in minutes) |
 
 
 Bridges (JSON of a bridge):
 
-| Config Value | Value type | Description                                       |
+| Config Key | Value type | Description                                       |
 |--------------|------------|---------------------------------------------------|
 | name         | string     | Name of the bridge, useful for the /bridges command|
 | discord chat_id | string  | Channel ID of Discord, get it by enabling developer mode on Discord, right clicking on the channel and clicking "Copy Channel ID"|
 | telegram chat_id | string | Chat ID of the Telegram group chat, get it by using the /chatinfo command of TeleBridge |
 | hide | boolean (true, false) | Decides if the bridge should be hidden in the /bridges command if the command is ran on a Discord server/Telegram chat that's not the hidden one |
+
+owner:
+
+| Config Key | Value Type | Description |
+| discord    | string     | Your [Discord User ID](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-) |
+| telegram   | string     | Your Telegram ID, get it by running the /me command of your Telebridge instance |
 
 ## Discord commands
 

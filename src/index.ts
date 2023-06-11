@@ -1,4 +1,4 @@
-import { clearOldMessages, setupMtProto } from './core/setup/main.js';
+import { clearOldMessages, setupMtProto, setDeletedCheckTimeout } from './core/setup/main.js';
 import { config as DotEnvConfig } from "dotenv";
 import { Db, MongoClient } from 'mongodb'
 import chalk from 'chalk'
@@ -84,6 +84,7 @@ if (process.env.API_ID && process.env.API_HASH) {
     })
 
     fs.writeFileSync(`${process.cwd()}/.string_session`, `${telegram.mtproto.session.save()}`)
+    if (global.config.check_for_deleted_messages) await setDeletedCheckTimeout()
 } else {
     console.log(chalk.yellow('API_ID and API_HASH not found, skipping MTProto setup'))
 }
@@ -138,6 +139,8 @@ interface Config {
         discord: string;
         telegram: string;
     }
+    check_for_deleted_messages: boolean;
+    deleted_message_check_interval: number;
 }
 
 

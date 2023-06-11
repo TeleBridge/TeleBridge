@@ -27,5 +27,7 @@
     "owner": {
         "discord": "123456789012345678",
         "telegram": "123456789"
-    }
+    },
+    "check_for_deleted_messages": false,
+    "deleted_message_check_interval": 5
 }

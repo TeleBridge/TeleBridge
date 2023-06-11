@@ -12,7 +12,11 @@ const tgclient = new Telegraf(process.env.TGTOKEN)
 
 tgclient.command('chatinfo', async (ctx) => {
   if (ctx.chat.type === 'private') return ctx.reply('This command can only be used in a group chat.')
-  ctx.reply(`Chat ID: ${ctx.chat.id}\nChat Type: ${ctx.chat.type}\nChat Title: ${ctx.chat.title}`)
+  ctx.reply(`Chat ID: <code>${ctx.chat.id}</code>\nChat Type: ${ctx.chat.type}\nChat Title: ${ctx.chat.title}`, { parse_mode: 'HTML' })
+})
+
+tgclient.command("me", async (ctx) => {
+  ctx.reply(`Your Telegram ID is <code>${ctx.from.id}</code>`, { parse_mode: "HTML" })
 })
 
 tgclient.command("eval", async (ctx) => { 
@@ -158,6 +162,7 @@ tgclient.command("info", async (ctx) => {
 })
 
 tgclient.start((ctx) => ctx.replyWithHTML('Welcome!\nThis is a self-hosted TeleBridge instance, for more info, check out the <a href="https://github.com/TeleBridge/TeleBridge">GitHub Repo</a>\nFor a list of bridges, run the /bridges command\nFor more infos, check the /info command.'))
+
 
 export default tgclient
 
