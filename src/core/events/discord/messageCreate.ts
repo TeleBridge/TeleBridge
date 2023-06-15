@@ -15,7 +15,7 @@ export async function execute(dsclient: Client, tgclient: Telegraf, message: Mes
         const telegramChatId = global.config.bridges[i].telegram.chat_id;
         if (message.channel.id === discordChatId) {
             let attachmentarray: string[] = [];
-            let authorTag = message.author.tag.replace("#0", "")
+            let authorTag = message.author.tag.replace(/#0$/, "")
             message.attachments.forEach(async ({ url }) => {
                 attachmentarray.push(url);
             });

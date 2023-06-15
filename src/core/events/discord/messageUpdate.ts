@@ -19,6 +19,6 @@ export async function execute(dsclient: Client, tgclient: Telegraf, oM: Message,
         if (nM.cleanContent) msgcontent = md2html(escapeHTMLSpecialChars(nM.cleanContent));
         if (!msgcontent) msgcontent = '';
         const string = attachmentarray.toString().replaceAll(',', ' ')
-        await tgclient.telegram.editMessageText(messageid.chatIds.telegram, parseInt(messageid.telegram), undefined, `<b>${nM.author.tag.replace("#0", "")}</b>:\n${msgcontent} ${string}`, { parse_mode: 'HTML' })
+        await tgclient.telegram.editMessageText(messageid.chatIds.telegram, parseInt(messageid.telegram), undefined, `<b>${nM.author.tag.replace(/#0$/, "")}</b>:\n${msgcontent} ${string}`, { parse_mode: 'HTML' })
     }
 }
