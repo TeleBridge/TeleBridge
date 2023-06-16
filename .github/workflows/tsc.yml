@@ -10,7 +10,7 @@ jobs:
             - name: Checkout project
               uses: actions/checkout@v3
             - name: Build
-              uses: alexthemaster/action-build-typescript@v. # check the releases tab on the right for versions (looks like this: v1.0.0)
+              uses: alexthemaster/action-build-typescript@v1.3.1 # check the releases tab on the right for versions (looks like this: v1.0.0)
               # use this if you want the sharpest of cutting edges (can and probably WILL break from time to time)
               # uses: alexthemaster/action-build-typescript@master
               with:
