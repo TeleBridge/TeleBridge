@@ -79,6 +79,7 @@ Bridges (JSON of a bridge):
 owner:
 
 | Config Key | Value Type | Description |
+| ---------- | ---------- | ---------|
 | discord    | string     | Your [Discord User ID](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-) |
 | telegram   | string     | Your Telegram ID, get it by running the /me command of your Telebridge instance |
 
