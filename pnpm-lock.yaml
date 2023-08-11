@@ -27,8 +27,8 @@ dependencies:
     specifier: ^4.12.2
     version: 4.12.2
   telegram:
-    specifier: ^2.17.4
-    version: 2.17.4
+    specifier: ^2.18.24
+    version: 2.18.24
   typegram:
     specifier: ^5.0.0
     version: 5.0.0
@@ -517,7 +517,7 @@ packages:
   /async-mutex@0.3.2:
     resolution: {integrity: sha512-HuTK7E7MT7jZEh1P9GtRW9+aTWiDWWi9InbZ5hjxrnRa39KS4BW04+xLBhYNS2aXhHUIKZSw3gj4Pn1pj+qGAA==}
     dependencies:
-      tslib: 2.5.0
+      tslib: 2.6.1
     dev: false
 
   /base64-js@1.5.1:
@@ -1144,8 +1144,8 @@ packages:
       - supports-color
     dev: false
 
-  /telegram@2.17.4:
-    resolution: {integrity: sha512-HSDXvY5aZ1Uo2H3d1lyJUifGRkI6qlizAfLm5drlbHoy4DKG+J3+QoGhtlOqxxH/03jcT1e6maEWzJxzqXaSLA==}
+  /telegram@2.18.24:
+    resolution: {integrity: sha512-yqA2jPThg2Wq31tJ1vqi+XILHqZ8DZy/XiEiHiJ9fZGtNHfjvlFLCWvJyBUL4cRSClXi1r4dFV/DrXqyI/eLqA==}
     dependencies:
       '@cryptography/aes': 0.1.1
       async-mutex: 0.3.2
@@ -1202,10 +1202,6 @@ packages:
 
   /ts-mixer@6.0.3:
     resolution: {integrity: sha512-k43M7uCG1AkTyxgnmI5MPwKoUvS/bRvLvUb7+Pgpdlmok8AoqmUaZxUUw8zKM5B1lqZrt41GjYgnvAi0fppqgQ==}
-    dev: false
-
-  /tslib@2.5.0:
-    resolution: {integrity: sha512-336iVw3rtn2BUK7ORdIAHTyxHGRIHVReokCR3XjbckJMK7ms8FysBfhLR8IXnAgy7T0PTPNBWKiH514FOW/WSg==}
     dev: false
 
   /tslib@2.6.1:
