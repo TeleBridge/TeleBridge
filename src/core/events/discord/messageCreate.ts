@@ -15,7 +15,7 @@ export async function execute(dsclient: Client, tgclient: Telegraf, message: Mes
         const telegramChatId = global.config.bridges[i].telegram.chat_id;
         if (message.channel.id === discordChatId) {
             let attachmentarray: string[] = [];
-            let authorTag = message.author.tag.replace(/#0$/, "")
+            
             message.attachments.forEach(async ({ url }) => {
                 attachmentarray.push(url);
             });
@@ -25,7 +25,7 @@ export async function execute(dsclient: Client, tgclient: Telegraf, message: Mes
             if (message.stickers.size > 0 && !message.reference) {
                 const sticker = message.stickers.first();
                 if (sticker?.format === StickerFormatType.Lottie || sticker?.format === StickerFormatType.APNG) {
-                    const msg = await tgclient.telegram.sendMessage(telegramChatId, `<b>${authorTag}</b>:\n<i>Lottie/APNG stickers are currently not supported, sending the message content</i>\n${msgcontent}`, { parse_mode: 'HTML' })
+                    const msg = await tgclient.telegram.sendMessage(telegramChatId, `<b>${message.author.displayName} (@${message.author.tag})</b>:\n<i>Lottie/APNG stickers are currently not supported, sending the message content</i>\n${msgcontent}`, { parse_mode: 'HTML' })
                     await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id, chatIds: { telegram: telegramChatId, discord: discordChatId } })
                     return;
                 }
@@ -35,7 +35,7 @@ export async function execute(dsclient: Client, tgclient: Telegraf, message: Mes
 
                 const buffer = await image.resize(512, 512).getBufferAsync(jimp.MIME_PNG)
 
-                await tgclient.telegram.sendMessage(telegramChatId, `<b>${authorTag}</b>:\n${msgcontent}\nSticker⬇️`, { parse_mode: 'HTML' })
+                await tgclient.telegram.sendMessage(telegramChatId, `<b>${message.author.displayName} (@${message.author.tag})</b>:\n${msgcontent}\nSticker⬇️`, { parse_mode: 'HTML' })
                 const msg = await tgclient.telegram.sendSticker(telegramChatId, { source: buffer })
                 await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id, chatIds: { telegram: telegramChatId, discord: discordChatId } })
                 return;
@@ -51,36 +51,36 @@ export async function execute(dsclient: Client, tgclient: Telegraf, message: Mes
                         const image = await jimp.read(stickerurl)
 
                         if (sticker?.format === StickerFormatType.Lottie || sticker?.format === StickerFormatType.APNG) {
-                            const msg = await tgclient.telegram.sendMessage(telegramChatId, `<b>${authorTag}</b>:\n<i>Lottie/APNG stickers are currently not supported, sending the message content</i>\n${msgcontent}`, { reply_to_message_id: parseInt(msgid.telegram), parse_mode: 'HTML' })
+                            const msg = await tgclient.telegram.sendMessage(telegramChatId, `<b>${message.author.displayName} (@${message.author.tag})</b>:\n<i>Lottie/APNG stickers are currently not supported, sending the message content</i>\n${msgcontent}`, { reply_to_message_id: parseInt(msgid.telegram), parse_mode: 'HTML' })
                             await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id, chatIds: { telegram: telegramChatId, discord: discordChatId } })
                             return;
                         }
 
 
                         const buffer = await image.resize(512, 512).getBufferAsync(jimp.MIME_PNG)
-                        await tgclient.telegram.sendMessage(telegramChatId, `<b>${authorTag}</b>:\n${msgcontent}`, { reply_to_message_id: parseInt(msgid.telegram), parse_mode: 'HTML' })
+                        await tgclient.telegram.sendMessage(telegramChatId, `<b>${message.author.displayName} (@${message.author.tag})</b>:\n${msgcontent}`, { reply_to_message_id: parseInt(msgid.telegram), parse_mode: 'HTML' })
                         const msg = await tgclient.telegram.sendSticker(telegramChatId, { source: buffer }, { reply_to_message_id: parseInt(msgid.telegram) })
                         await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id, chatIds: { telegram: telegramChatId, discord: discordChatId } })
                         return;
                     }
                     if (message.flags.toArray().includes("IsVoiceMessage")) {
-                        const msg = await tgclient.telegram.sendVoice(telegramChatId, message.attachments.first()?.url ?? '', { reply_to_message_id: parseInt(msgid.telegram), caption: `<b>${authorTag}</b>:\n${msgcontent}`, parse_mode: 'HTML' })
+                        const msg = await tgclient.telegram.sendVoice(telegramChatId, message.attachments.first()?.url ?? '', { reply_to_message_id: parseInt(msgid.telegram), caption: `<b>${message.author.displayName} (@${message.author.tag})</b>:\n${msgcontent}`, parse_mode: 'HTML' })
                         await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id, chatIds: { telegram: telegramChatId, discord: discordChatId } })
                         return;
                     }
-                    const msg = await tgclient.telegram.sendMessage(telegramChatId, `<b>${authorTag}</b>:\n${msgcontent} ${attachmentURLs}`, { parse_mode: 'HTML', reply_to_message_id: parseInt(msgid.telegram) })
+                    const msg = await tgclient.telegram.sendMessage(telegramChatId, `<b>${message.author.displayName} (@${message.author.tag})</b>:\n${msgcontent} ${attachmentURLs}`, { parse_mode: 'HTML', reply_to_message_id: parseInt(msgid.telegram) })
                     await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id, chatIds: { telegram: telegramChatId, discord: discordChatId } })
                     return;
                 }
             }
 
             if (message.flags.toArray().includes("IsVoiceMessage")) {
-                const msg = await tgclient.telegram.sendVoice(telegramChatId, message.attachments.first()?.url ?? '', { caption: `<b>${authorTag}</b>:\n${msgcontent}`, parse_mode: 'HTML' })
+                const msg = await tgclient.telegram.sendVoice(telegramChatId, message.attachments.first()?.url ?? '', { caption: `<b>${message.author.displayName} (@${message.author.tag})</b>:\n${msgcontent}`, parse_mode: 'HTML' })
                 await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id, chatIds: { telegram: telegramChatId, discord: discordChatId } })
                 return;
             }
 
-            const msg = await tgclient.telegram.sendMessage(telegramChatId, `<b>${authorTag}</b>:\n${msgcontent} ${attachmentURLs}`, { parse_mode: 'HTML' })
+            const msg = await tgclient.telegram.sendMessage(telegramChatId, `<b>${message.author.displayName} (@${message.author.tag})</b>:\n${msgcontent} ${attachmentURLs}`, { parse_mode: 'HTML' })
             await global.db.collection('messages').insertOne({ discord: message.id, telegram: msg.message_id, chatIds: { telegram: telegramChatId, discord: discordChatId } });
         }
     }

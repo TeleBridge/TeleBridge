@@ -158,7 +158,7 @@ tgclient.command('bridges', async (ctx) => {
 })
 
 tgclient.command("info", async (ctx) => {
-  ctx.replyWithHTML("TeleBridge is a bridge between Telegram and Discord made by <a href=\"https://antogamer.it\">Antogamer</a>\n\nIt doesn\'t have a public instance, so you\'ll have to selfhost it, but don\'t worry! It\'s easy!\n\nCheck me out on <a href=\"https://github.com/TeleBridge/TeleBridge.git\">GitHub</a>")
+  ctx.replyWithHTML("TeleBridge is a bot that bridges messages between Telegram and Discord and it's made by <a href=\"https://antogamer.it\">Anto</a>\n\nIt doesn\'t have a public instance, so you\'ll have to selfhost it, but don\'t worry! It\'s easy to set up!\n\nCheck me out on <a href=\"https://github.com/TeleBridge/TeleBridge.git\">GitHub</a>!")
 })
 
 tgclient.start((ctx) => ctx.replyWithHTML('Welcome!\nThis is a self-hosted TeleBridge instance, for more info, check out the <a href="https://github.com/TeleBridge/TeleBridge">GitHub Repo</a>\nFor a list of bridges, run the /bridges command\nFor more infos, check the /info command.'))

@@ -9,8 +9,6 @@ import { StringSession } from 'telegram/sessions/StringSession.js';
 import { DeletedMessage, DeletedMessageEvent } from 'telegram/events/DeletedMessage.js'
 import { APIActionRowComponent, APIButtonComponent, TextChannel } from 'discord.js';
 import fs from 'fs'
-import { msgExecute } from '../commands/discord/eval.js';
-import { telegramBaseClient } from 'telegram/client/index.js';
 
 
 export function clearOldMessages(tgBot: Telegraf, offset = -1): any {
