@@ -27,8 +27,8 @@ dependencies:
     specifier: ^4.12.2
     version: 4.12.2
   telegram:
-    specifier: ^2.18.24
-    version: 2.18.24
+    specifier: ^2.18.26
+    version: 2.18.26
   typegram:
     specifier: ^5.0.0
     version: 5.0.0
@@ -1144,8 +1144,8 @@ packages:
       - supports-color
     dev: false
 
-  /telegram@2.18.24:
-    resolution: {integrity: sha512-yqA2jPThg2Wq31tJ1vqi+XILHqZ8DZy/XiEiHiJ9fZGtNHfjvlFLCWvJyBUL4cRSClXi1r4dFV/DrXqyI/eLqA==}
+  /telegram@2.18.26:
+    resolution: {integrity: sha512-W05ltjndq/xj4yFG77ttaUDmm+ywJFlNV1WVYm63ptRg2UXyhkq0RZuwshvNdYLA2ic2Re9VqZpg5c9ySeDouw==}
     dependencies:
       '@cryptography/aes': 0.1.1
       async-mutex: 0.3.2
