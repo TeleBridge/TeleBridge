@@ -19,7 +19,7 @@
     "discord.js": "^14.12.1",
     "dotenv": "^16.3.1",
     "jimp": "^0.22.10",
-    "mongodb": "^5.8.1",
+    "mongodb": "^6.0.0",
     "telegraf": "^4.12.2",
     "telegram": "^2.18.26",
     "typegram": "^5.0.0",
