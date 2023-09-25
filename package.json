@@ -21,7 +21,7 @@
     "jimp": "^0.22.10",
     "mongodb": "^5.8.1",
     "telegraf": "^4.12.2",
-    "telegram": "^2.18.26",
+    "telegram": "^2.18.38",
     "typegram": "^5.0.0",
     "typescript": "^5.2.2"
   },
