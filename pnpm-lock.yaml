@@ -27,8 +27,8 @@ dependencies:
     specifier: ^4.12.2
     version: 4.12.2
   telegram:
-    specifier: ^2.18.38
-    version: 2.18.38
+    specifier: ^2.19.6
+    version: 2.19.6
   typegram:
     specifier: ^5.0.0
     version: 5.0.0
@@ -1143,8 +1143,8 @@ packages:
       - supports-color
     dev: false
 
-  /telegram@2.18.38:
-    resolution: {integrity: sha512-pj+7lnxbjdTZ2cIGledJjrQwmDwKbq6JJzEUm2/Qu4AHVI1TXVjCKHl5mphXumhtIdNs0FSnCjTqQOad2Ef7eA==}
+  /telegram@2.19.6:
+    resolution: {integrity: sha512-Uh3wo+0qXhqTCDWGiy8yrUQAiy9Xi5jaE5q4bjs9TPb7OZceVnh9ROnWhzYYbo6Q6MeC47DNpgolBCB+g8lm7Q==}
     dependencies:
       '@cryptography/aes': 0.1.1
       async-mutex: 0.3.2
@@ -1363,6 +1363,5 @@ packages:
     resolution: {commit: 75cc68df12a484e136b44e46603383e477d7b368, repo: git@github.com:TeleBridge/entity.git, type: git}
     name: '@telebridge/entity'
     version: 0.0.0-dev
-    prepare: true
     requiresBuild: true
     dev: false
