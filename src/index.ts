@@ -17,7 +17,9 @@ for (const folder of eventsFolders) {
   for (const file of eventFiles) {
     const event = await import(`./core/events/telegram/${folder}/${file}`)
 
-    const filters: any = {
+    const filters: {
+        [key: string]: any
+    } = {
       "editedMessage": editedMessage(event.name),
       "message": message(event.name),
       "editedChannelPost": editedChannelPost(event.name),
@@ -42,7 +44,7 @@ for (const file of eventFiles) {
 const GHpackageJson = await (await fetch("https://raw.githubusercontent.com/TeleBridge/TeleBridge/master/package.json")).json()
 const packageJson = JSON.parse(fs.readFileSync(`${process.cwd()}/package.json`, 'utf-8'))
 
-if (GHpackageJson.version !== packageJson.version) {
+if (parseInt(GHpackageJson.version.replaceAll(".", "")) > parseInt(packageJson.version.replaceAll(".", ""))) {
     console.log(chalk.yellow('New version available, it\'s recommended to update'))
     console.log(chalk.yellow('Current version: ' + packageJson.version))
     console.log(chalk.yellow('New version: ' + GHpackageJson.version))
