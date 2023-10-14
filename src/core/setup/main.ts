@@ -222,7 +222,8 @@ export async function validateChannels() {
 				bridge.disabled = true;
 			}
 		} catch (error) {
-			throw new Error(`${error}`)
+			console.log(chalk.yellow("There was an error while trying to fetch the Telegram chat of \"" + bridge.name + "\", disabling the bridge (the messages of that bridge won't be forwarded)"))
+			bridge.disabled = true;
 		}
 
 	}
@@ -230,7 +231,6 @@ export async function validateChannels() {
 }
 
 async function deletedMessageEvent(event: DeletedMessageEvent) {
-	console.log("Got deleted message event, didn't expect that to work, create an issue on GitHub to let me know please!", event)
 	try {
 		for (let i = 0; i < global.config.bridges.length; i++) {
 			if (global.config.bridges[i].disabled) continue;
