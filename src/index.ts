@@ -34,11 +34,21 @@ const eventFiles = fs.readdirSync(`${process.cwd()}/dist/core/events/discord`).f
 
 for (const file of eventFiles) {
     const event = await import(`${process.cwd()}/dist/core/events/discord/${file}`);
-    if (event.name === 'ready') {
-        discord.once(event.name, (...args) => event.execute(discord, ...args));
-        continue;
+    switch (event.name) {
+        case 'ready': {
+            discord.once(event.name, (...args) => event.execute(discord, ...args));
+            continue;
+        }
+        case "interactionCreate": {
+            discord.on(event.name, (...args) => event.execute(discord, ...args));
+            continue;
+        }
+        default: {
+            discord.on(event.name, (...args) => event.execute(discord, telegram, ...args));
+            continue;
+        }
     }
-    discord.on(event.name, (...args) => event.execute(discord, telegram, ...args));
+    
 }
 
 const GHpackageJson = await (await fetch("https://raw.githubusercontent.com/TeleBridge/TeleBridge/master/package.json")).json()

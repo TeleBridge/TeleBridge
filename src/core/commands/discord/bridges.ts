@@ -12,13 +12,22 @@ export async function execute(dsclient: Client, interaction: ChatInputCommandInt
         const telegramChatId = global.config.bridges[i].telegram.chat_id;
         if (global.config.bridges[i].hide && (dsclient.channels.cache.get(global.config.bridges[i].discord.chat_id) as TextChannel).guildId !== interaction.guildId) continue;
         const bridgeName = global.config.bridges[i].name;
-        const discordChannel = await dsclient.channels.fetch(discordChatId);
-        const telegramChannel = await tgclient.telegram.getChat(telegramChatId);
-        if (telegramChannel.type === "private") return; // Typescript moment
-        embedString += `
+        try {
+            const discordChannel = await dsclient.channels.fetch(discordChatId);
+            const telegramChannel = await tgclient.telegram.getChat(telegramChatId);
+            if (telegramChannel.type === "private") return; // Typescript moment
+            embedString += `
             **${bridgeName}**:
                 **${(discordChannel as TextChannel).name}** (${discordChatId}) - **${telegramChannel.title}** (${telegramChatId})\n
             `
+        } catch (error) {
+            embedString += `
+            **${bridgeName}**:
+                **Invalid bridge**\n
+            `
+            continue;
+        }
+
     }
 
     const embed: APIEmbed = {
