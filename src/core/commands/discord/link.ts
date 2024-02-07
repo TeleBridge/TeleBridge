@@ -9,7 +9,7 @@ export async function execute(client: Client, interaction: ChatInputCommandInter
     let dbval;
     dbval = await global.db.collection("Users").findOne({ discord_id: interaction.user.id })
     if (dbval && !dbval.code) {
-        await interaction.reply({ content: "You already have a linked account.", ephemeral: true });
+        await interaction.editReply({ content: "You already have a linked account." });
         return;
     }
 
@@ -34,7 +34,7 @@ export async function execute(client: Client, interaction: ChatInputCommandInter
             int++;
             continue;
         } else if (int === global.config.bridges.length) {
-            await interaction.reply({ content: "You can only link your account in a server with TeleBridge enabled.", ephemeral: true });
+            await interaction.editReply({ content: "You can only link your account in a server with TeleBridge enabled." });
             return;
         }
     }
