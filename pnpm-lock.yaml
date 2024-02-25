@@ -24,8 +24,8 @@ dependencies:
     specifier: ^5.8.1
     version: 5.8.1
   telegraf:
-    specifier: ^4.12.2
-    version: 4.12.2
+    specifier: ^4.15.3
+    version: 4.15.3
   telegram:
     specifier: ^2.18.38
     version: 2.18.38
@@ -475,6 +475,10 @@ packages:
   /@sapphire/snowflake@3.5.1:
     resolution: {integrity: sha512-BxcYGzgEsdlG0dKAyOm0ehLGm2CafIrfQTZGWgkfKYbj+pNNsorZ7EotuZukc2MT70E0UbppVbtpBrqpzVzjNA==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
+    dev: false
+
+  /@telegraf/types@6.9.1:
+    resolution: {integrity: sha512-bzqwhicZq401T0e09tu8b1KvGfJObPmzKU/iKCT5V466AsAZZWQrBYQ5edbmD1VZuHLEwopoOVY5wPP4HaLtug==}
     dev: false
 
   /@tokenizer/token@0.3.0:
@@ -1125,11 +1129,12 @@ packages:
       peek-readable: 4.1.0
     dev: false
 
-  /telegraf@4.12.2:
-    resolution: {integrity: sha512-PgwqI4wD86cMqVfFtEM9JkGGnMHgvgLJbReZMmwW4z35QeOi4DvbdItONld4bPnYn3A1jcO0SRKs0BXmR+x+Ew==}
+  /telegraf@4.15.3:
+    resolution: {integrity: sha512-pm2ZQAisd0YlUvnq6xdymDfoQR++8wTalw0nfw7Tjy0va+V/0HaBLzM8kMNid8pbbt7GHTU29lEyA5CAAr8AqA==}
     engines: {node: ^12.20.0 || >=14.13.1}
     hasBin: true
     dependencies:
+      '@telegraf/types': 6.9.1
       abort-controller: 3.0.0
       debug: 4.3.4
       mri: 1.2.0
@@ -1137,7 +1142,6 @@ packages:
       p-timeout: 4.1.0
       safe-compare: 1.1.4
       sandwich-stream: 2.0.2
-      typegram: 4.3.0
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -1219,10 +1223,6 @@ packages:
     resolution: {integrity: sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==}
     dependencies:
       is-typedarray: 1.0.0
-    dev: false
-
-  /typegram@4.3.0:
-    resolution: {integrity: sha512-pS4STyOZoJ++Mwa9GPMTNjOwEzMkxFfFt1By6IbMOJfheP0utMP/H1ga6J9R4DTjAYBr0UDn4eQg++LpWBvcAg==}
     dev: false
 
   /typegram@5.0.0:
@@ -1363,6 +1363,5 @@ packages:
     resolution: {commit: 75cc68df12a484e136b44e46603383e477d7b368, repo: git@github.com:TeleBridge/entity.git, type: git}
     name: '@telebridge/entity'
     version: 0.0.0-dev
-    prepare: true
     requiresBuild: true
     dev: false
