@@ -3,7 +3,7 @@ A Telegram-Discord bridge with support to multiple bridges!
 
 ![TeleBridge Image](https://raw.githubusercontent.com/TeleBridge/.github/13b4764fbf73812d2342dde0063ce85cb69cc0d7/files/GitHub_Preview.png)
 
-Do you want to try the bot before self-hosting it? [Join my Discord server](https://discord.gg/NKdSrmky6b) and/or [the TeleBridge test group](https://t.me/+FxQGfeA-C2hmYjA8) on Telegram
+Do you want to try the bot before self-hosting it? [Join my Discord server](https://discord.com/invite/NKdSrmky6b) and/or [the TeleBridge test group](https://t.me/+FxQGfeA-C2hmYjA8) on Telegram
 
 ## Requirements
 - MongoDB Database (Atlas is fine but idk if there are ratelimits, selfhost ftw)
@@ -11,7 +11,7 @@ Do you want to try the bot before self-hosting it? [Join my Discord server](http
 
 ## Support/Help
 
-Do you need some help to run the bot? [Join my Discord server](https://discord.gg/ekaCwEfUt4) and go to the `telebridge-support` channel, I'll be happy to help you!
+Do you need some help to run the bot? [Join my Discord server](https://discord.com/invite/NKdSrmky6b) and go to the `telebridge-support` channel, I'll be happy to help you!
 
 ## How to host
 ### You should install [NodeJS](https://nodejs.org/en/) to continue
