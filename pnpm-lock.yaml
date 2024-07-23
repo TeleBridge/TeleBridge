@@ -30,8 +30,8 @@ dependencies:
     specifier: ^2.18.38
     version: 2.18.38
   typegram:
-    specifier: ^5.0.0
-    version: 5.0.0
+    specifier: ^5.2.0
+    version: 5.2.0
   typescript:
     specifier: ^5.2.2
     version: 5.2.2
@@ -1225,8 +1225,8 @@ packages:
     resolution: {integrity: sha512-pS4STyOZoJ++Mwa9GPMTNjOwEzMkxFfFt1By6IbMOJfheP0utMP/H1ga6J9R4DTjAYBr0UDn4eQg++LpWBvcAg==}
     dev: false
 
-  /typegram@5.0.0:
-    resolution: {integrity: sha512-6Z4klKmEsDKfN8dLEf8Buh6vZk1RMGUgOJscVSRXbM+RiiRgjeabc2NucR4e+RoQ1m3mwMjbi+Td+TbrQTWT+g==}
+  /typegram@5.2.0:
+    resolution: {integrity: sha512-QubWrgT+tVPpM3/KkT/Rdd2zTYUwx96hePKBSio8pAWUD847M6W6akZppFs5BKfLtzuHBeTgjps528LJ+H1k+w==}
     dev: false
 
   /typescript@5.2.2:
