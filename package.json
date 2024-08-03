@@ -16,7 +16,7 @@
   "dependencies": {
     "@telebridge/entity": "github:TeleBridge/entity",
     "chalk": "^5.3.0",
-    "discord.js": "^14.13.0",
+    "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
     "jimp": "^0.22.10",
     "mongodb": "^5.8.1",
