@@ -8,6 +8,7 @@ Do you want to try the bot before self-hosting it? [Join my Discord server](http
 ## Requirements
 - MongoDB Database (Atlas is fine but idk if there are ratelimits, selfhost ftw)
 - Latest NodeJS version (18.16.0+)
+- Git, if you don't have it installed you might get issues while installing npm packages
 
 ## Support/Help
 
