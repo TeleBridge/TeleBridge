@@ -52,7 +52,7 @@ export async function execute(dsclient: Client, interaction: ChatInputCommandInt
 
     const confirmEmbed: APIEmbed = {
         title: 'Account unlinking',
-        description: `Are you sure you want to unlink this account from the following Telegram account?\n\nUsername: ${user.user.username || (user.user.first_name + " " + user.user.last_name ?? "") }\nID: ${user.user.id}`,
+        description: `Are you sure you want to unlink this account from the following Telegram account?\n\nUsername: ${user.user.username || (user.user.first_name + " " + user.user.last_name) }\nID: ${user.user.id}`,
         color: 0x00ff00,
         timestamp: new Date().toISOString(),
         footer: {

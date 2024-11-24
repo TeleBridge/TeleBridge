@@ -144,7 +144,7 @@ export function handleEditedUser(ctx: Context) {
 			break;
 	}
 
-	if (ctx.has(editedMessage("text" || "caption")) && ctx.editedMessage.reply_to_message !== undefined) {
+	if ((ctx.has(editedMessage("text")) || ctx.has(editedMessage("caption"))) && ctx.editedMessage.reply_to_message !== undefined) {
 		switch (ctx.editedMessage.reply_to_message.from?.username) {
 			case undefined:
 				userreply = ctx.editedMessage.reply_to_message.from?.first_name;
@@ -154,8 +154,8 @@ export function handleEditedUser(ctx: Context) {
 				break;
 		}
 	}
-	if (ctx.has(editedMessage("text" || "caption")) && ctx.editedMessage.is_automatic_forward) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.editedMessage.forward_sender_name }
-	if (ctx.has(editedMessage("text" || "caption")) && ctx.editedMessage.via_bot) { extraargs = `(Via **${ctx.editedMessage.via_bot.username}**)`; }
+	if ((ctx.has(editedMessage("text")) || ctx.has(editedMessage("caption"))) && ctx.editedMessage.is_automatic_forward) { extraargs = `(_Automatic Forward from channel_)`; username = ctx.editedMessage.forward_sender_name }
+	if ((ctx.has(editedMessage("text")) || ctx.has(editedMessage("caption"))) && ctx.editedMessage.via_bot) { extraargs = `(Via **${ctx.editedMessage.via_bot.username}**)`; }
 	if (userreply) { extraargs = `(Replying to ${userreply})`; }
 	if (extraargs === undefined) extraargs = '';
 	if (userreply === undefined) userreply = '';
