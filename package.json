@@ -22,7 +22,7 @@
     "mongodb": "^5.8.1",
     "telegraf": "^4.12.2",
     "telegram": "^2.18.38",
-    "typegram": "^5.0.0",
+    "typegram": "^5.2.0",
     "typescript": "^5.2.2"
   },
   "type": "module"
