@@ -15,7 +15,7 @@ const eventsFolders = fs.readdirSync(process.cwd() + '/dist/core/events/telegram
 for (const folder of eventsFolders) {
   const eventFiles = fs.readdirSync(process.cwd() + `/dist/core/events/telegram/${folder}`).filter(file => file.endsWith('.js'))
   for (const file of eventFiles) {
-    const event = await import(`./core/events/telegram/${folder}/${file}`)
+    const event = await import(`file://${process.cwd()}/dist/core/events/telegram/${folder}/${file}`)
 
     const filters: {
         [key: string]: any
@@ -33,7 +33,7 @@ for (const folder of eventsFolders) {
 const eventFiles = fs.readdirSync(`${process.cwd()}/dist/core/events/discord`).filter(file => file.endsWith('.js'));
 
 for (const file of eventFiles) {
-    const event = await import(`${process.cwd()}/dist/core/events/discord/${file}`);
+    const event = await import(`file://${process.cwd()}/dist/core/events/discord/${file}`);
     switch (event.name) {
         case 'ready': {
             discord.once(event.name, (...args) => event.execute(discord, ...args));

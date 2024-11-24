@@ -8,7 +8,7 @@ export async function execute(dsclient: Client) {
 
     let commandsArray: any[] = [];
     for (const file of commandFiles) {
-        const command: Command = await import(`${process.cwd()}/dist/core/commands/discord/${file}`);
+        const command: Command = await import(`file://${process.cwd()}/dist/core/commands/discord/${file}`);
         if (command.messageContent) {
             dsclient.msgCommands.set(command.name, command);
             continue;
