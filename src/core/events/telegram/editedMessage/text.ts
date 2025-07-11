@@ -3,6 +3,7 @@ import { Context, Telegraf, } from "telegraf";
 import { escapeChars, handleEditedUser } from "../../../setup/main.js";
 import { editedMessage } from "telegraf/filters";
 import { toMarkdownV2 } from "@telebridge/entity";
+import { MessageEntity } from "typegram";
 
 
 export const name = "text";
@@ -25,14 +26,14 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
 
                 if (messageid) {
                     if (ctx.editedMessage.text.length >= 2000) {
-                        const msgId = await ctx.telegram.sendMessage(ctx.chat.id, `<i>The text is too long to be sent due to Discord's limits (2000 characters)`, { parse_mode: "HTML", reply_to_message_id: ctx.editedMessage.message_id })
+                        const msgId = await ctx.telegram.sendMessage(ctx.chat.id, `<i>The text is too long to be sent due to Discord's limits (2000 characters)`, { parse_mode: "HTML", reply_parameters: { message_id: ctx.editedMessage.message_id } })
                         setTimeout(() => {
                             ctx.telegram.deleteMessage(ctx.chat.id, msgId.message_id)
                         }, 3000);
                         return;
                     } 
                     const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).messages.fetch(messageid.discord)
-                    await msg.edit(`**${escapeChars(username)}** ${extraargs}:\n ${toMarkdownV2(ctx.editedMessage)}`)
+                    await msg.edit(`**${escapeChars(username)}** ${extraargs}:\n ${toMarkdownV2({ text: ctx.editedMessage.text, entities: ctx.editedMessage.entities as MessageEntity[] || [] })}`)
                 }
             }
         }

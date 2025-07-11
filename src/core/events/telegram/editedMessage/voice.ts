@@ -3,6 +3,7 @@ import { Context, Telegraf, } from "telegraf";
 import { escapeChars, handleEditedUser } from "../../../setup/main.js";
 import { editedMessage } from "telegraf/filters";
 import { toMarkdownV2 } from "@telebridge/entity";
+import { MessageEntity } from "typegram";
 
 export const name = "voice";
 export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context) {
@@ -27,7 +28,7 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                     const msg = await (dsclient.channels.cache.get(discordChatId) as TextChannel).messages.fetch(messageid.discord)
                     const video = ctx.editedMessage.voice
                     const attachment = new AttachmentBuilder((await ctx.telegram.getFileLink(video.file_id)).href, { name: video.file_id + ".ogg" })
-                    await msg.edit({ content: `**${escapeChars(username)}** ${extraargs}:\n ${toMarkdownV2(ctx.editedMessage)}`, files: [attachment] })
+                    await msg.edit({ content: `**${escapeChars(username)}** ${extraargs}:\n ${toMarkdownV2({ text: ctx.editedMessage.caption || "", entities: ctx.editedMessage.caption_entities as MessageEntity[] || []})}`, files: [attachment] })
                 }
             }
         }

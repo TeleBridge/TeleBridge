@@ -3,6 +3,7 @@ import { Context, Telegraf, } from "telegraf";
 import { escapeChars, getButtons, handleUser } from "../../../setup/main.js";
 import { message } from "telegraf/filters";
 import { toMarkdownV2 } from "@telebridge/entity";
+import { MessageEntity } from "typegram";
 
 
 export const name = "text";
@@ -28,7 +29,7 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                 let extraargs = user.extraargs
                 let userreply = user.userreply
                 let messageOptions: any = {
-                    content: `**${escapeChars(username)}** ${extraargs}:\n ${toMarkdownV2(ctx.message)}`
+                    content: `**${escapeChars(username)}** ${extraargs}:\n ${toMarkdownV2({ text: ctx.message.text, entities: ctx.message.entities as MessageEntity[] || [] })}`
                 }
                 let buttons;
                 if (ctx.message.reply_markup) {

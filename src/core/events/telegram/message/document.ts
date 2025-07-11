@@ -3,6 +3,7 @@ import { Context, Telegraf, } from "telegraf";
 import { escapeChars, getButtons, handleUser } from "../../../setup/main.js";
 import { message } from "telegraf/filters";
 import { toMarkdownV2 } from "@telebridge/entity";
+import { MessageEntity } from "typegram";
 
 export const name = "document";
 export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context) {
@@ -24,7 +25,7 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
                         msgcontent = `_No caption_`
                         break;
                     default:
-                        msgcontent = toMarkdownV2(ctx.message)
+                        msgcontent = toMarkdownV2({ text: ctx.message.caption, entities: ctx.message.caption_entities as MessageEntity[] || [] })
                         break;
                     case ctx.message.caption && ctx.message.caption.length >= 2000:
                         msgcontent = `_Caption too long_`

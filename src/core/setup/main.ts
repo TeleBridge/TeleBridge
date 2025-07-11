@@ -1,5 +1,5 @@
 import { Context, Telegraf } from 'telegraf';
-import { Update } from 'typegram';
+import { Chat, Update } from '@telegraf/types';
 import { editedMessage, message } from 'telegraf/filters';
 import dsclient from '../discord.js';
 import tgclient from '../telegram.js';
@@ -15,11 +15,11 @@ export function clearOldMessages(tgBot: Telegraf, offset = -1): any {
 	const timeout = 0;
 	const limit = 100;
 	return tgBot.telegram.getUpdates(timeout, limit, offset, undefined)
-		.then(function (updateArray: Update[]) {
-			if (updateArray.length === 0) {
+		.then(function (value: Update[]) {
+			if (value.length === 0) {
 				return undefined;
 			} else {
-				const newOffset = updateArray[updateArray.length - 1].update_id + 1;
+				const newOffset = value[value.length - 1].update_id + 1;
 				return clearOldMessages(tgBot, newOffset);
 			}
 		});
@@ -72,8 +72,15 @@ export function handleUser(ctx: Context) {
 	if (!ctx.message || !ctx.chat) return undefined;
 	let forwardFromChatTitle: string = "";
 	let forwardName: string | undefined = "";
-	if (ctx.has(message("forward_from_chat")) && ctx.message.forward_from_chat.type === "private") forwardFromChatTitle = ctx.message.forward_from_chat.first_name;
-	if (ctx.has(message("forward_from_chat")) && ctx.message.forward_from_chat.type === "channel") forwardFromChatTitle = ctx.message.forward_from_chat.title;
+	if (ctx.has(message("forward_origin"))) {
+		const origin = ctx.message.forward_origin!;
+		if (origin.type === "user") {
+			forwardFromChatTitle = origin.sender_user.first_name;
+		}
+		if (origin.type === "channel") {
+			forwardFromChatTitle = (origin.chat as Chat.ChannelChat).title;
+		}
+	}
 	if (ctx.chat.type === "private") return undefined;
 	switch (ctx.message.from.username) {
 		case undefined:
@@ -93,15 +100,17 @@ export function handleUser(ctx: Context) {
 				break;
 		}
 	}
-	if (ctx.has(message("is_automatic_forward")) && ctx.has(message("forward_from_chat"))) {
-		if (ctx.message.forward_from_chat.type === "channel") {
+	if (ctx.has(message("is_automatic_forward")) && ctx.has(message("forward_origin"))) {
+		if (ctx.message.forward_origin.type === "channel") {
 			extraargs = `(_Automatic Forward from channel_)`;
 			username = forwardFromChatTitle;
 		}
 	}
-	if (ctx.has(message("forward_from_chat")) && !ctx.has(message("is_automatic_forward")) && ctx.message.forward_from_chat.type !== "private") {
+	if (ctx.has(message("forward_origin")) && ctx.message.forward_origin.type !== "user" && !ctx.message.is_automatic_forward) {
 		extraargs = `(Forwarded by ${username})`;
-		username = ctx.message.forward_from_chat.title;
+		if (ctx.message.forward_origin.type === "channel") {
+			username = (ctx.message.forward_origin.chat as Chat.ChannelChat).title;
+		}
 	}
 
 	if (ctx.from?.username === "GroupAnonymousBot" && ctx.message.sender_chat && ctx.message.sender_chat.type !== 'private') {

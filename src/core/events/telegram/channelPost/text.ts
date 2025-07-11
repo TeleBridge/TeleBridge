@@ -3,6 +3,7 @@ import { Context, Telegraf, } from "telegraf";
 import { escapeChars } from "../../../setup/main.js";
 import { channelPost } from "telegraf/filters";
 import { toMarkdownV2 } from "@telebridge/entity";
+import { MessageEntity } from "typegram";
 
 
 export const name = "text";
@@ -15,7 +16,7 @@ export async function execute(tgclient: Telegraf, dsclient: Client, ctx: Context
             const telegramChatId = global.config.bridges[i].telegram.chat_id;
             if (parseInt(telegramChatId) === ctx.chat.id) {
                 let messageOptions: any = {
-                    content: `**${escapeChars(ctx.update.channel_post.chat.title)}**:\n ${toMarkdownV2(ctx.channelPost)}`
+                    content: `**${escapeChars(ctx.update.channel_post.chat.title)}**:\n ${toMarkdownV2({ text: ctx.channelPost.text, entities: ctx.channelPost.entities as MessageEntity[] || [] })}`
                 }
                 const buttons: APIActionRowComponent<APIButtonComponent> = {
                     type: 1,

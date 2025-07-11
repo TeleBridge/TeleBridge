@@ -1,4 +1,4 @@
-import { Client, Message } from 'discord.js'
+import { ChannelType, Client, Message } from 'discord.js'
 import { inspect } from 'util'
 
 export const name = 'eval'
@@ -7,6 +7,11 @@ export const description = 'Evaluate a piece of code'
 export async function msgExecute(client: Client, message: Message, args: string[]) { 
     if (global.config.owner.discord !== message.author.id)
         return;
+
+    if (message.channel.type !== ChannelType.GuildText && message.channel.type !== ChannelType.GuildAnnouncement) {
+        await message.reply('This command can only be used in text channels.');
+        return;
+    }
 
     const toEval = `(async  () => {${clean(args.join(' '))}})()`;
 
