@@ -1,3 +1,23 @@
+## ⚠️ This project is in maintenance mode!
+ Skip to the end for a TLDR.
+
+Over the years I've started using Telegram less and less as most of the stuff I do is based on Discord.
+
+Everytime i open TeleBridge's source i end up closing it without doing anything due to procrastination and the bad code I've written years ago weighting on me.
+
+While you most likely can't expect new features after this warning, I can assure you that I'll continue supporting this project via bug fixes and such when needed.
+
+I've considered making a full rewrite of the bridge, I in fact already made a base for it (without any features) over a year ago and if I ever decide to continue here's what you should expect:
+- All current features of TeleBridge
+- Migration to a SQL database (most likely sqlite as i find it the most suitable for this project
+- Topics support/supporting new Telegram features
+
+Goodbye (for now!), if you happen to find a bug in the current version of TeleBridge make sure to open an issue and I'll try to get on it as soon as I can!
+
+Thank you for choosing TeleBridge ❤️
+
+**TLDR**: This project won't get any feature updates, however I'll continue to push bugfixes and such when needed. If TeleBridge ever fully comes back, it will be a complete rewrite.
+
 # TeleBridge
 A Telegram-Discord bridge with support to multiple bridges!
 
